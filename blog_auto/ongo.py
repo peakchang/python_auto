@@ -162,11 +162,11 @@ def makeBlogContent():
     a = random.sample(range(1,101),10) # 1부터 100까지의 범위중에 10개를 중복없이 뽑겠다.
     print(a)
     subjectArr = ['창동','더큐브','오피스텔','아레나','분양','정보']
-    firstPage = requests.get('https://m.blog.naver.com/wpthdud0/222906496708')
+    firstPage = requests.get('https://m.blog.naver.com/namimi73/222900821656')
     fisrtContent = makeContentArr(firstPage)
 
     
-    seconPage = requests.get('https://m.blog.naver.com/meirand/222713232416')
+    seconPage = requests.get('https://m.blog.naver.com/yess888/222909267980')
     secondContent = makeContentArr(seconPage)
     
     if len(fisrtContent) > len(secondContent):

@@ -197,7 +197,8 @@ def goScript(getDict):
                     if category_name[0:2] == setTong:
                         chkin_tong = "on"
                         print('여기서 나는 에러가 맞는걸까요?????')
-                        untilEleShow(category, ".selected_btn_del__0mIMB")
+                        # untilEleShow(category, ".selected_btn_del__0mIMB")
+                        untilEleShow(category, ".mainFilter_option__c4_Lq")
 
                 if chkin_tong == "":
                     addKeyword = link_excel.cell(workVal, 1).value
@@ -211,8 +212,7 @@ def goScript(getDict):
             item_list = driver.find_elements("xpath", "//*[contains(@class, 'product_list_item')]")
             topProduct_val = random.randrange(0, 4)
             wait_float(0.5, 1.7)
-            driver.execute_script(
-                "arguments[0].scrollIntoView();", item_list[topProduct_val])
+            driver.execute_script("arguments[0].scrollIntoView();", item_list[topProduct_val])
             untilEleGone(item_list[topProduct_val], ".product_list_item")
 
             wait_float(2, 5)
@@ -233,15 +233,14 @@ def goScript(getDict):
                         wait_float(2, 4)
                         resetCount = 0
                     
-                    item_list = driver.find_elements(
-                        "xpath", "//*[contains(@class, 'product_list_item')]")
+                    item_list = driver.find_elements("xpath", "//*[contains(@class, 'product_list_item')]")
 
                     if len(item_list) < 35:
                         pg.hotkey('end')
                         wait_float(2, 4)
                     else:
                         break
-
+                    
                 chkCount = 0
                 for item in item_list:
                     chkCount += 1
@@ -266,10 +265,10 @@ def goScript(getDict):
                         # pg.alert(itemZzimCount[1].text)
                         
                         break
-                pg.alert(chkCount)
-                pg.alert(searchElement('.product_btn_zzim__kfwDI'))
+                # pg.alert(chkCount)
+                # pg.alert(searchElement('.product_btn_zzim__kfwDI'))
                 
-                pg.alert('대기~~~')
+                # pg.alert('대기~~~')
 
                 if truncBreak == "on":
                     break
@@ -381,18 +380,44 @@ def onProductScroll(maxRange):
     while True:
         driver.back()
         wait_float(3, 5)
-        get_shop_list = driver.find_element(
-            by=By.CSS_SELECTOR, value='.header_basic')
+        get_shop_list = driver.find_element(by=By.CSS_SELECTOR, value='.mainFilter_option__c4_Lq')
         if get_shop_list is not None:
             return
 
 
 # 지식쇼핑 검색 (2번 해야되니께~~)
 def searchJisho(searchKeyword, driver):
-    nShopSearchVar = searchElement("#sear")
+    reCount = 0
+    while True:
+        reCount += 1
+        wait_float(0.5,0.9)
+        if reCount % 5 == 0:
+            driver.refresh()
+            pg.press('F5')
+        try:
+            nShopSearchVar = driver.find_element(by=By.CSS_SELECTOR, value='#sear')
+            if(nShopSearchVar):
+                break
+        except:
+            pass
+        
+        try:
+            nShopSearchVar = driver.find_element(by=By.CSS_SELECTOR, value='#input_text')
+            if(nShopSearchVar):
+                break
+        except:
+            pass
+        try:
+            nShopSearchVar = driver.find_element(by=By.CSS_SELECTOR, value='._combineHeader_text_result_8IG-1')
+            if(nShopSearchVar):
+                break
+        except:
+            pass
+        
+    
     driver.execute_script("window.scrollTo(0,0);")
     wait_float(0.5, 1)
-    nShopSearchVar[0].click()
+    nShopSearchVar.click()
 
     focus_window("네이버쇼핑")
 
@@ -403,7 +428,7 @@ def searchJisho(searchKeyword, driver):
     wait_float(0.5, 1)
 
     # nShopSearchVar[0].send_keys(searchKeyword)
-    nShopSearchVar[0].click()
+    # nShopSearchVar.click()
     keyboard.write(text=searchKeyword, delay=0.3)
 
     wait_float(1.2, 2.5)
@@ -694,7 +719,7 @@ def exitApp():
 def focus_window(winName):
     if winName == 'chkname':
         win_list = gw.getAllTitles()
-        pg.alert(text=f"{win_list}")
+        # pg.alert(text=f"{win_list}")
     # 윈도우 타이틀에 Chrome 이 포함된 모든 윈도우 수집, 리스트로 리턴
     win = gw.getWindowsWithTitle(winName)[0]
     win.activate()  # 윈도우 활성화

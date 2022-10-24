@@ -1,0 +1,13 @@
+Mozilla/5.0 (Linux; Android 11; SM-T505) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.104 Safari/537.36
+SAMSUNG SM-T505N AppleWebKit/537.36 (KHTML, like Gecko Chrome/89.0.4389.105 Safari/537.36
+SAMSUNG SM-T515N AppleWebKit/537.36 (KHTML, like Gecko Chrome/93.0.4577.62 Safari/537.36
+SAMSUNG SM-T720 AppleWebKit/537.36 (KHTML, like Gecko Chrome/94.0.4606.80 Safari/537.36
+SAMSUNG SM-T720 AppleWebKit/537.36 (KHTML, like Gecko Chrome/94.0.4606.85 Safari/537.36
+SAMSUNG SM-T800 AppleWebKit/537.36 (KHTML, like Gecko SamsungBrowser/14.2 Chrome/87.0.4280.141 Safari/537.36
+SAMSUNG SM-T715N0 AppleWebKit/537.36 (KHTML, like Gecko SamsungBrowser/15.0 Chrome/90.0.4430.210 Safari/537.36
+
+
+
+
+
+http://www.ikmr.co.kr/admin/stat/os.asp?YY=2021&MM=10&DD=13

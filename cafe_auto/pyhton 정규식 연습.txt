@@ -1,0 +1,46 @@
+user_1 = ['Jason' , 'Smith', 'Kevin']
+user_1.pop(1) # 'Smith' 삭제
+print(user_1)
+pg.alert(text='대기!!')
+
+
+# p = re.compile('[a-z]+')
+# m = p.match("3 python") # 문자열의 처음부터 검색해서 조사 처음 또는 중간에 매칭 안되는 부분 있으면 리턴
+
+# m = p.search("sldijfli asdlfj liasjdf adlfgj adfgj") # 문자열 전체에서 검색한다. 단, 첫번째 결과값 이후 매칭 안되는 부분이 있으면 리턴
+# <re.Match object; span=(0, 8), match='sldijfli'>
+# m = p.findall("sldijfli asdlfj liasjdf adlfgj adfgj") # 문자열 전체에서 검색, 원하는 결과값의 전체를 배열로 리턴
+# m = p.finditer("sldijfli asdlfj liasjdf adlfgj adfgj") # 문자열 전체에서 검색, 원하는 결과값의 전체를 배열로 리턴
+# strVal = 'lasjdfl234234234sdlfjsdf345dfgfdg'
+# m = strVal.replace(p,'')
+# print(m)
+
+text = "오늘의 sun $$ ** ^^ && 좋은데  cloud SO MANY 너무 많아"
+p = re.compile('[a-zA-Z]+')
+# p = re.compile('\s\s')
+m = p.search(text) # 문자열 전체에서 검색한다. 단, 첫번째 결과값 이후 매칭 안되는 부분이 있으면 리턴
+
+print(m)
+# pg.alert(text='잠깐 대기!')
+
+
+
+# print(chkResult)
+
+text_mod = re.sub('[-=+,#/\?:^$.@*\"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`\'…》]',"",text)
+
+text_mod = re.sub('\s\s'," ",text_mod)
+text_mod = re.sub('\s\s'," ",text_mod)
+text_mod = re.sub('\s\s'," ",text_mod)
+print(text_mod)
+
+# [-=+,#/\?:^$.@*\"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`\'…》]
+# [^\uAC00-\uD7A30-9a-zA-Z\s]
+text = '''010-1234-5678 Kim 011-1234-5678 Lee 
+016-1234-5678 Han'''
+text = "010-1234-5678 Kim 011-1234-5678 Lee"
+
+# 정규 표현식 사용 치환 
+text_mod = re.sub('^[0-9]{3}-[0-9]{4}-[0-9]{4}',"***-****-****",text)
+
+print (text_mod)

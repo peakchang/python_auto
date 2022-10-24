@@ -1,0 +1,14 @@
+*.xlsx
+*.spec
+
+adb.exe
+AdbWinApi.dll
+AdbWinUsbApi.dll
+secrets.json
+
+__pycache__/
+build/
+dist/
+
+cafe_auto/etc/content
+

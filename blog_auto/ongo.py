@@ -44,6 +44,18 @@ import asyncio
 
 def goScript(getDict):
     
+    files = sorted(glob.glob('.\\etc\\content\\*.txt'), key=os.path.getctime)
+    for file in files:
+        print(file)
+        setFileName = file.replace('.\\etc\\content\\', '')
+        print(setFileName)
+        with open(file, 'r') as f:
+            f.read()
+            # print(f.read())
+    
+    pg.alert('대기~')
+    
+    
     # folder = 'id_1'
     # with open(f'./etc/content/{folder}/content.txt', 'r') as f:
     #     getLines = f.readlines()
@@ -94,8 +106,13 @@ def goScript(getDict):
     
     
     path_dir = './etc/content'
-    folder_list = os.listdir(path_dir)
-    for folder in folder_list:
+    # folder_list = os.listdir(path_dir)
+    # for folder in folder_list:
+    
+    
+    
+    files = sorted(glob.glob('.\\etc\\content\\*.txt'), key=os.path.getctime)
+    for file in files:
         print(driver.window_handles)
         # driver.to_switch()
         driver.switch_to.window(driver.window_handles[1])
@@ -103,16 +120,36 @@ def goScript(getDict):
         driver.switch_to.frame('mainFrame')
         
         writeArea = searchElement('.se-component-content')
-        pg.alert(writeArea)
         
-        with open(f'./etc/content/{folder}/content.txt', 'r') as f:
+        with open(file, 'r') as f:
             getLines = f.readlines()
             
         for i, getline in enumerate(getLines):
+            focus_window('블로그')
             getline = getline.replace('\n', '')
-            
-            if getline == 'img_line':
-                pg.alert('이미지를 첨부 해주세요 첨부 후 확인 버튼을 클릭 해주세요')
+            chkImg = getline.split('|')
+            if chkImg[0] == 'img_line':
+                nowPath = os.getcwd()
+                
+                img_btn = searchElement('.se-image-toolbar-button')
+                img_btn[0].click()
+                wait_float(1.5,2.3)
+                
+                imagePath = nowPath + f"\etc\content"
+                wait_float(1.5, 2.2)
+                pyperclip.copy(imagePath)
+                wait_float(0.5, 0.9)
+                pg.hotkey('ctrl','v')
+                wait_float(0.5, 0.9)
+                pg.press('enter')
+                
+                wait_float(0.9, 1.6)
+                pyperclip.copy(chkImg[1])
+                wait_float(0.5, 0.9)
+                pg.hotkey('ctrl','v')
+                wait_float(0.5, 0.9)
+                pg.press('enter')
+                wait_float(3.5,4.5)
                 continue
             
             if i == 0:
@@ -130,7 +167,6 @@ def goScript(getDict):
                 wait_float(0.5,0.9)
                 pg.press('enter')
                 wait_float(0.5,0.9)
-        
         pg.alert('글 작성 완료!! 반드시 예약으로 발행 해주세요!! 다음글이 있을경우 글쓰기 준비를 해주세요!')
     
     

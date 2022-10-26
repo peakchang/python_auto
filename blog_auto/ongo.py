@@ -56,20 +56,6 @@ def goScript(getDict):
     pg.alert('대기~')
     
     
-    # folder = 'id_1'
-    # with open(f'./etc/content/{folder}/content.txt', 'r') as f:
-    #     getLines = f.readlines()
-        
-        
-    
-    # print(getLines)
-    # pg.alert('대기~~~')
-
-    # path_dir = './etc/content'
-    # file_list = os.listdir(path_dir)
-    # print(file_list)
-    # pg.alert('대기~~~')
-    
     exLineNum = getDict['nlist']
     wb = load_workbook('./etc/nid.xlsx')
     ex = wb.active
@@ -168,42 +154,29 @@ def goScript(getDict):
                 pg.press('enter')
                 wait_float(0.5,0.9)
         pg.alert('글 작성 완료!! 반드시 예약으로 발행 해주세요!! 다음글이 있을경우 글쓰기 준비를 해주세요!')
-    
-    
-    
-    
-    # options = Options()
-    # service = Service(ChromeDriverManager().install())
-    # # options.add_argument("--headless")
-    # options.add_argument('--no-sandbox')
-    # options.add_argument("--disable-dev-shm-usage")
-    
-    # user_data = r'C:\Users\pcy\AppData\Local\Google\Chrome\User Data'
-    # options.add_argument(f"user-data-dir={user_data}")
-    
-    # # default => 1 / 2 => 2 / 3 => 4 / 4 => 5
-    # options.add_argument('--profile-directory=Profile 3')
-    
-    # pg.alert('대기1111')
-    # driver = webdriver.Chrome(options=options)
-    
-    # pg.alert('대기2222')
-    # driver.get('https://www.naver.com/')
-    
-    # pg.alert(text='로그인 대기~~~~')
+        
     
 def makeBlogContent():
     
+    with open('./etc/blog_link.txt', 'r') as f:
+        getBlogLink = f.readlines()
     
-    a = random.sample(range(1,101),10) # 1부터 100까지의 범위중에 10개를 중복없이 뽑겠다.
-    print(a)
-    subjectArr = ['창동','더큐브','오피스텔','아레나','분양','정보']
-    firstPage = requests.get('https://m.blog.naver.com/namimi73/222900821656')
+    try:
+        subject = getBlogLink[2].replace('\n', '')
+        with open('./etc/text.txt', 'w') as f:
+            f.write(f'{subject}\n')
+    except:
+        pass
+    
+    firstLinkTemp = getBlogLink[0].replace('\n', '')
+    firstLink = firstLinkTemp.replace('//','//m.')
+    firstPage = requests.get(firstLink)
     fisrtContent = makeContentArr(firstPage)
 
-    
-    seconPage = requests.get('https://m.blog.naver.com/yess888/222909267980')
-    secondContent = makeContentArr(seconPage)
+    secondLinkTemp = getBlogLink[0].replace('\n', '')
+    secondLink = secondLinkTemp.replace('//','//m.')
+    secondPage = requests.get(secondLink)
+    secondContent = makeContentArr(secondPage)
     
     if len(fisrtContent) > len(secondContent):
         contentLength = len(secondContent)
@@ -234,7 +207,7 @@ def makeBlogContent():
             resultSentence = resultSentence + lastSentence + '.'
             
             f.write(f'{resultSentence}\n')
-    pg.alert('대기요~~~~~~~~~~~~')
+    exitApp()
 
 
 

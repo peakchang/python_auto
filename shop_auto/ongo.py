@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Optional
 import requests
 import json
+import re
 
 import pyautogui as pg
 import pyperclip
@@ -41,7 +42,6 @@ import asyncio
 
 def goScript(getDict):
     
-    
     # 전체 반복 시작 전 preIp 값 초기화
     preIp = ""
 
@@ -58,6 +58,8 @@ def goScript(getDict):
     # 전체 반복 시작 전 지쇼 링크 열고 전체 행 갯수 체크
     jisho_wb = load_workbook('./etc/jisho_link.xlsx')
     link_excel = jisho_wb.active
+    
+    
     setVal = "wait"
     linkCount = 1
     while setVal != None:
@@ -184,6 +186,7 @@ def goScript(getDict):
         untilEleGone(nShoppingLink[0], ".link_name")
 
         for workVal in workArr:
+            
             searchKeyword = link_excel.cell(workVal, 2).value
             searchJisho(searchKeyword, driver)
 
@@ -208,6 +211,8 @@ def goScript(getDict):
                     else:
                         searchKeyword = addKeyword + " " + searchKeyword
                     searchJisho(searchKeyword, driver)
+                    
+            
 
             item_list = driver.find_elements("xpath", "//*[contains(@class, 'product_list_item')]")
             topProduct_val = random.randrange(0, 4)
@@ -254,21 +259,44 @@ def goScript(getDict):
                         item.click()
                         maxRange = random.randrange(4, 6)
                         onProductScroll(maxRange)
-                        
-                        
-                        searchElement('.products_list_inner__P2NJm')
-                        # 해당 아이템 찜 찾기
-                        # pg.alert(item)
-                        # itemZzim = item.find_element(by=By.CSS_SELECTOR, value='.product_btn_zzim__kfwDI')
-                        # pg.alert(itemZzim)
-                        # itemZzimCount = item.find_elements(by=By.CSS_SELECTOR, value='.product_info_count__PSSO1 span')
-                        # pg.alert(itemZzimCount[1].text)
-                        
                         break
-                # pg.alert(chkCount)
-                # pg.alert(searchElement('.product_btn_zzim__kfwDI'))
                 
-                # pg.alert('대기~~~')
+                zzimRandomVal = random.randrange(1, 4)
+                #찜하기~~~
+                if chk_login != 1 and zzimRandomVal == 1:
+                    while True:
+                        try:
+                            allItem = driver.find_elements("xpath", "//*[contains(@class, 'product_list_item')]")
+                            if allItem:
+                                break
+                        except:
+                            continue
+                        
+                    get_item = allItem[chkCount - 1]
+                    
+                    try:
+                        itemZzimEle = get_item.find_elements(by=By.CSS_SELECTOR, value='.product_info_count__PSSO1 span')
+                        itemZzimLastEle = itemZzimEle[-1]
+                        itemZzimCountText = itemZzimLastEle.text
+                        itemZzimCount = re.sub(r'[^0-9]', '', itemZzimCountText)
+                        itemZzimCount = int(itemZzimCount)
+                    except:
+                        itemZzimCount = 0
+                    
+                    targetZzimCountChk = link_excel.cell(workVal, 6).value
+                    if targetZzimCountChk is not None:
+                        targetZzimCount = int(targetZzimCountChk)
+                    else:
+                        targetZzimCount = 0
+                        
+                    if targetZzimCount > itemZzimCount:
+                        itemZzim = get_item.find_element(by=By.CSS_SELECTOR, value='.product_btn_zzim__kfwDI')
+                        print(itemZzim)
+                        if itemZzim.text == '찜하기':
+                            writeZzim = itemZzimCount + 1
+                            link_excel.cell(workVal, 7).value = writeZzim
+                            jisho_wb.save('./etc/jisho_link.xlsx')
+                            itemZzim.click()
 
                 if truncBreak == "on":
                     break
@@ -288,8 +316,11 @@ def goScript(getDict):
             
         # 아래 내용 웹훅 넣기
         endTime = time.time() - startTime
-        with open('./etc/chkTime.txt', 'w') as f:
-            f.write(f'걸린 시간은? : {endTime} \n')
+        
+        webhook_url = "https://adpeak.kr/chk_jisho/"
+        data = {'on_time' : endTime}
+        requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
+        r = requests.post(webhook_url, data=json.dumps(data), headers={'Content-Type' : 'application/json'}, verify=False)
         
         
         

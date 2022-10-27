@@ -156,60 +156,211 @@ def goScript(getDict):
         pg.alert('글 작성 완료!! 반드시 예약으로 발행 해주세요!! 다음글이 있을경우 글쓰기 준비를 해주세요!')
         
     
-def makeBlogContent():
+# def makeBlogContent():
     
-    with open('./etc/blog_link.txt', 'r') as f:
-        getBlogLink = f.readlines()
+#     with open('./etc/blog_link.txt', 'r') as f:
+#         getBlogLink = f.readlines()
     
-    try:
-        subject = getBlogLink[2].replace('\n', '')
-        with open('./etc/text.txt', 'w') as f:
-            f.write(f'{subject}\n')
-    except:
-        pass
+#     try:
+#         subject = getBlogLink[2].replace('\n', '')
+#         with open('./etc/text.txt', 'w') as f:
+#             f.write(f'{subject}\n')
+#     except:
+#         pass
     
-    firstLinkTemp = getBlogLink[0].replace('\n', '')
-    firstLink = firstLinkTemp.replace('//','//m.')
-    firstPage = requests.get(firstLink)
-    fisrtContent = makeContentArr(firstPage)
+#     firstLinkTemp = getBlogLink[0].replace('\n', '')
+#     firstLink = firstLinkTemp.replace('//','//m.')
+#     firstPage = requests.get(firstLink)
+#     fisrtContent = makeContentArr(firstPage)
 
-    secondLinkTemp = getBlogLink[0].replace('\n', '')
-    secondLink = secondLinkTemp.replace('//','//m.')
-    secondPage = requests.get(secondLink)
-    secondContent = makeContentArr(secondPage)
+#     secondLinkTemp = getBlogLink[0].replace('\n', '')
+#     secondLink = secondLinkTemp.replace('//','//m.')
+#     secondPage = requests.get(secondLink)
+#     secondContent = makeContentArr(secondPage)
     
-    if len(fisrtContent) > len(secondContent):
-        contentLength = len(secondContent)
-    else:
-        contentLength = len(fisrtContent)
+#     if len(fisrtContent) > len(secondContent):
+#         contentLength = len(secondContent)
+#     else:
+#         contentLength = len(fisrtContent)
         
-    with open('./etc/text.txt', 'a') as f:
-        for i in range(0, contentLength):
-            getLastSentence_first = fisrtContent[i].pop(len(fisrtContent[i]) - 1)
-            getLastSentence_second = secondContent[i].pop(len(secondContent[i]) - 1)
+#     with open('./etc/text.txt', 'a') as f:
+#         for i in range(0, contentLength):
+#             getLastSentence_first = fisrtContent[i].pop(len(fisrtContent[i]) - 1)
+#             getLastSentence_second = secondContent[i].pop(len(secondContent[i]) - 1)
 
             
-            if random.randrange(1,3) == 1:
-                lastSentence = getLastSentence_first
-                allArr = secondContent[i] + fisrtContent[i]
-            else:
-                lastSentence = getLastSentence_second
-                allArr = fisrtContent[i] + secondContent[i]
+#             if random.randrange(1,3) == 1:
+#                 lastSentence = getLastSentence_first
+#                 allArr = secondContent[i] + fisrtContent[i]
+#             else:
+#                 lastSentence = getLastSentence_second
+#                 allArr = fisrtContent[i] + secondContent[i]
                 
             
-            sampleRandom = random.sample(range(0, len(allArr)), len(allArr) // 3 * 2)
-            resultSentence = ''
+#             sampleRandom = random.sample(range(0, len(allArr)), len(allArr) // 3 * 2)
+#             resultSentence = ''
             
-            for k in sampleRandom:
-                resultSentence = resultSentence + allArr[k] + ' '
-            # for k in range(1, len(sampleRandom)):
-            #     resultSentence = resultSentence + allArr[sampleRandom[]] + ' '
-            resultSentence = resultSentence + lastSentence + '.'
+#             for k in sampleRandom:
+#                 resultSentence = resultSentence + allArr[k] + ' '
+#             # for k in range(1, len(sampleRandom)):
+#             #     resultSentence = resultSentence + allArr[sampleRandom[]] + ' '
+#             resultSentence = resultSentence + lastSentence + '.'
             
-            f.write(f'{resultSentence}\n')
+#             f.write(f'{resultSentence}\n')
+#     exitApp()
+
+
+def makeBlogContent():
+    
+    # service = Service(ChromeDriverManager().install())
+    # driver = webdriver.Chrome(service=service)
+    # driver.get('https://section.blog.naver.com/BlogHome.naver')
+
+    # try:
+    #     popup = driver.find_element(by=By.CSS_SELECTOR, value='#floatingda_home')
+    #     popupClostBtn = popup.find_elements(by=By.CSS_SELECTOR, value='button')
+    #     popupClostBtn[-1].click()
+    # except:
+    #     pass
+
+    # while True:
+    #     try:
+    #         nCategoryList = driver.find_elements(by=By.CSS_SELECTOR, value='.navigator_category a')
+    #         categoryRanVal = random.randrange(0, len(nCategoryList) - 1)
+    #         nCategoryList[categoryRanVal].click()
+
+    #         wait_float(0.5, 0.9)
+
+    #         paginationNum = driver.find_elements(by=By.CSS_SELECTOR, value='.pagination span')
+    #         driver.execute_script("arguments[0].scrollIntoView();", paginationNum[0])
+    #         paginationRanVal = random.randrange(0, len(paginationNum) -1)
+    #         getClickPage = paginationNum[paginationRanVal].find_element(by=By.CSS_SELECTOR, value='a')
+    #         getClickPage.click()
+    #         wait_float(0.5, 0.9)
+
+    #         infoPostList = driver.find_elements(by=By.CSS_SELECTOR, value='.info_post')
+    #         infoPostRanVal = random.randrange(0, len(infoPostList) - 1)
+    #         getInfoPostTag_a = infoPostList[infoPostRanVal].find_element(by=By.CSS_SELECTOR, value='.desc a')
+    #         getInfoPostLink = getInfoPostTag_a.get_attribute('href')
+    #         getInfoPostLink = getInfoPostLink.replace('//', '//m.')
+    #     except:
+    #         driver.refresh()
+    #         focus_window('chrome')
+    #         pg.press('F5')
+    #         wait_float(2.5,3.5)
+    #         continue
+    
+    getInfoPostLink = 'https://m.blog.naver.com/lsh5755/222682860724'
+
+    page = requests.get(getInfoPostLink)
+    soup = bs(page.text, "html.parser")
+    elements = soup.select('.se-module.se-module-text')
+    
+    pg.alert(elements)
+    
+    
+    allStr = []
+    chkCount = 0
+    for ele in elements:
+        chkCount += 1
+        p = re.compile('[\uAC00-\uD7A30-9a-zA-Z\s]+')
+        chkResult = p.findall(str(ele))
+        if chkCount == 1:
+            subjectTemp = chkResult
+        allStr = allStr + chkResult
+
+    p_str = re.compile(r'[a-zA-Z0-9,|\n]+')
+    p_space = re.compile('\s\s')
+    
+    subjectArrTemp = []
+    for sentence_s in subjectTemp:
+        getStr = p_str.search(sentence_s)
+        if getStr is None:
+            subjectArrTemp.append(sentence_s)
+    
+    
+    
+    tempSubjectOn = ''
+    for tempss in subjectArrTemp:
+        if tempss == ' ':
+            continue
+        tempSubjectOn = tempSubjectOn + tempss
+    
+    
+    
+    subjectArr = tempSubjectOn.split(' ')
+        
+        
+
+    for i in range(1, len(allStr)):
+        for j, strin in enumerate(allStr):
+            getStr = p_str.search(strin)
+            if getStr is not None:
+                allStr.pop(j)
+                break
+            getSpace = p_space.search(strin)
+            if getSpace is not None:
+                allStr.pop(j)
+                break
+            if strin == " ":
+                allStr.pop(j)
+                break
+    allStr = "".join(allStr)
+    
+    # if len(allStr) < 1500:
+    #     continue
+    # if len(allStr) > 1900:
+    #     sliceRanNum = random.randrange(1050, 1150)
+    #     allStr = allStr[0:sliceRanNum]
+    # break
+
+    resetStrArr = allStr.split(' ')
+
+    resetListArr = list_chunk(resetStrArr, 12)
+    for resetList in resetListArr:
+        setRan = random.randrange(2, 5)
+        resetOn = random.sample(range(1, 13), setRan)
+
+        if resetList == "":
+            continue
+
+        for inon in resetOn:
+            changeRanCount = random.randrange(0, len(subjectArr))
+            chkChangeRan = random.randrange(1, 6)
+            if chkChangeRan == 1:
+                try:
+                    resetList[inon - 1] = subjectArr[changeRanCount]
+                except:
+                    pass
+            else:
+                try:
+                    resetList[inon - 1] = ''
+                except:
+                    pass
+
+    imgLineCountBasic = divmod(len(resetListArr), 2)
+    imgLineCount = random.randrange(
+        int(imgLineCountBasic[0]) - 4, int(imgLineCountBasic[0]) + 4)
+
+    allContent = ''
+    for i, setList in enumerate(resetListArr):
+        if imgLineCount == i:
+            allContent = allContent + 'img_line|randomimg\n'
+        for setStr in setList:
+            if setStr == '':
+                continue
+            elif len(setStr) > 20:
+                continue
+            allContent = allContent + setStr
+            allContent = allContent + ' '
+        allContent = allContent + '\n'
+
+    # driver.close()
+    pg.alert(allContent)
+    with open('./etc/text.txt', 'w') as f:
+        f.write(allContent)
+    
     exitApp()
-
-
 
 
 

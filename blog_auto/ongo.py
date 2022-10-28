@@ -250,7 +250,7 @@ def makeBlogContent():
     #         wait_float(2.5,3.5)
     #         continue
     
-    getInfoPostLink = 'https://m.blog.naver.com/lsh5755/222682860724'
+    getInfoPostLink = 'https://m.blog.naver.com/overroad89/222696651375'
 
     page = requests.get(getInfoPostLink)
     soup = bs(page.text, "html.parser")

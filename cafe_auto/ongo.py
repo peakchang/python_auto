@@ -547,9 +547,8 @@ def goScript(getDict):
 
 def mobile_chrome():
     preIp = ''
-
     while True:
-        getIP = changeIpSpeed()
+        getIP = changeIp()
         if not preIp == getIP:
             preIp = getIP
             break
@@ -775,6 +774,7 @@ def changeIp():
 
 
 def changeIpSpeed():
+    pg.alert(driver)
     os.system('adb server start')
     client = AdbClient(host="127.0.0.1", port=5037)
     device = client.devices()  # 디바이스 1개

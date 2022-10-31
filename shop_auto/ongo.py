@@ -42,6 +42,8 @@ import asyncio
 
 def goScript(getDict):
     
+    global driver
+    
     # 전체 반복 시작 전 preIp 값 초기화
     preIp = ""
 
@@ -95,8 +97,11 @@ def goScript(getDict):
 
         # 아이피 체크 (기존 아이피와 같으면 다시, 아니면 break)
         if getDict['ipval'] == 1:
+            
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service)
             while True:
-                getIP = changeIp()
+                getIP = changeIpSpeed()
                 print(getIP)
                 if not preIp == getIP:
                     preIp = getIP
@@ -148,7 +153,6 @@ def goScript(getDict):
         options = Options()
         user_agent = ua_data
         options.add_argument('user-agent=' + user_agent)
-        global driver
 
         service = Service(ChromeDriverManager().install())
         driver = webdriver.Chrome(chrome_options=options, service=service)
@@ -654,6 +658,58 @@ def changeIp():
                 continue
     return getIp
 
+
+def changeIpSpeed():
+    os.system('adb server start')
+    client = AdbClient(host="127.0.0.1", port=5037)
+    device = client.devices()  # 디바이스 1개
+    ondevice = device[0]
+    while True:
+        try:
+            
+            ondevice.shell("input keyevent KEYCODE_POWER")
+            ondevice.shell("svc data disable")
+            ondevice.shell("settings put global airplane_mode_on 1")
+            ondevice.shell(
+                "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true")
+
+            ondevice.shell("svc data enable")
+            ondevice.shell("settings put global airplane_mode_on 0")
+            ondevice.shell(
+                "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state false")
+            time.sleep(3)
+            while True:
+                try:
+                    wait_float(0.5, 0.9)
+                    getIp = requests.get("http://ip.jsontest.com").json()['ip']
+                    if getIp is not None:
+                        break
+                except:
+                    continue
+        except:
+
+            while True:
+                try:
+                    wait_float(0.5, 0.9)
+                    getIp = requests.get("http://ip.jsontest.com").json()['ip']
+                    if getIp is not None:
+                        break
+                except:
+                    continue
+                
+        
+        driver.get('https://fast.com/ko/')
+        searchElement('.speed-results-container')
+        time.sleep(3)
+        getInternetRapidEle = searchElement('.speed-results-container')
+        getInternetRapid = getInternetRapidEle[0].text
+        if float(getInternetRapid) < 2.7:
+            continue
+        else:
+            driver.close()
+            break
+        
+    return getIp
 
 # def searchElement(ele):
 #     time.sleep(1)

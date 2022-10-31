@@ -8,10 +8,16 @@ def th():
     onth.daemon = True
     onth.start()
 
-# def th2():
-#     onth = threading.Thread(ongo_searchItem())
-#     onth.daemon = True
-#     onth.start()
+def th2():
+    onth = threading.Thread(mobile_chrome())
+    onth.daemon = True
+    onth.start()
+    
+def th3():
+    onth = threading.Thread(chk_blog_content())
+    onth.daemon = True
+    onth.start()
+
 
 
 # 윈도우 창 생성 및 버튼 화면 조절
@@ -20,10 +26,10 @@ root.title("카페 자동화")
 root.geometry("300x360+500+300")
 root.resizable(False, FALSE)
 
-frame1 = LabelFrame(root, text='버튼', padx=40, pady=20)  # padx / pady 내부여백
+frame1 = LabelFrame(root, text='카페', padx=40, pady=10)  # padx / pady 내부여백
 frame1.pack(padx=10, pady=5)  # padx / pady 외부여백
 
-frame2 = LabelFrame(root, text='아이피 변경', padx=60, pady=0)  # padx / pady 내부여백
+frame2 = LabelFrame(root, text='Only', padx=60, pady=10)  # padx / pady 내부여백
 frame2.pack(padx=10, pady=5)  # padx / pady 외부여백
 
 frame3 = LabelFrame(root, text='아이피 변경', padx=60, pady=0)  # padx / pady 내부여백
@@ -38,6 +44,15 @@ btn1.pack()
 
 btn3 = Button(frame1, text="종료하기", command=exitApp, padx=50)
 btn3.pack()
+
+
+# 시작 버튼 생성
+f_btn1 = Button(frame2, text='모바일', command=th2, padx=50)
+f_btn1.pack()
+
+# 시작 버튼 생성
+f_btn2 = Button(frame2, text='체크체크', command=th3, padx=50)
+f_btn2.pack()
 
 
 # ipVal = IntVar()

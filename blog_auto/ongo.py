@@ -44,6 +44,17 @@ import asyncio
 
 def goScript(getDict):
     
+    if getDict['nlist'] == 1:
+        pg.alert('아이디가 선택되지 않았습니다. 다시 실행해주세요')
+        exitApp()
+    
+    global driver
+    
+    
+    
+    
+    
+    
     files = sorted(glob.glob('.\\etc\\content\\*.txt'), key=os.path.getctime)
     for file in files:
         print(file)
@@ -62,14 +73,16 @@ def goScript(getDict):
     
     
     preIp = ''
-    while True:
-        getIP = changeIp()
-        print(getIP)
-        if not preIp == getIP:
-            preIp = getIP
-            break
+    
+    if getDict['ipval'] == 1:
+        while True:
+            getIP = changeIp()
+            print(getIP)
+            if not preIp == getIP:
+                preIp = getIP
+                break
         
-    global driver
+    
     
     
     options = Options()
@@ -98,8 +111,10 @@ def goScript(getDict):
     
     
     files = sorted(glob.glob('.\\etc\\content\\*.txt'), key=os.path.getctime)
+    writeCount = 0
     for file in files:
-        print(driver.window_handles)
+        writeCount += 1
+        pg.alert(f'{writeCount}번째 글쓰기를 시작합니다!!')
         # driver.to_switch()
         driver.switch_to.window(driver.window_handles[1])
         
@@ -153,7 +168,12 @@ def goScript(getDict):
                 wait_float(0.5,0.9)
                 pg.press('enter')
                 wait_float(0.5,0.9)
-        pg.alert('글 작성 완료!! 반드시 예약으로 발행 해주세요!! 다음글이 있을경우 글쓰기 준비를 해주세요!')
+        pg.alert('글 작성 완료!! 다음글이 있을경우 글쓰기 준비를 해주세요!')
+        
+    
+    chkVal = pg.confirm(text='글쓰기가 완료 되었습니다!! 댓글을 진행 하시겠습니까?', buttons=['go','stop'])
+    if chkVal == 'go':
+        print('alsdjfliajsdflj')
         
     
 # def makeBlogContent():
@@ -210,45 +230,274 @@ def goScript(getDict):
 #     exitApp()
 
 
-def makeBlogContent():
+
+
+
+
+
+def blogReplyReady(getValList):
     
-    # service = Service(ChromeDriverManager().install())
-    # driver = webdriver.Chrome(service=service)
-    # driver.get('https://section.blog.naver.com/BlogHome.naver')
-
-    # try:
-    #     popup = driver.find_element(by=By.CSS_SELECTOR, value='#floatingda_home')
-    #     popupClostBtn = popup.find_elements(by=By.CSS_SELECTOR, value='button')
-    #     popupClostBtn[-1].click()
-    # except:
-    #     pass
-
+    if getValList['nlist'] == 1:
+        pg.alert('아이디가 선택되지 않았습니다. 다시 실행해주세요')
+        exitApp()
+    
+    global driver
+    
+    exLineNum = getValList['nlist']
+    wb = load_workbook('./etc/nid.xlsx')
+    ex = wb.active
+    
+    options = Options()
+    user_data = 'C:\\Users\\pcy\\AppData\\Local\\Google\\Chrome\\User Data\\default'
+    service = Service(ChromeDriverManager().install())
+    options.add_argument(f"user-data-dir={user_data}")
+    # options.add_argument('--profile-directory=Profile 3')
+    pg.alert('프로필을 선택해주세요!')
+    driver = webdriver.Chrome(service=service, chrome_options=options)
+    
+    driver.get('https://www.naver.com')
+    
+    loginBtn = searchElement('.sc_login')
+    loginBtn[0].click()
+    
     # while True:
-    #     try:
-    #         nCategoryList = driver.find_elements(by=By.CSS_SELECTOR, value='.navigator_category a')
-    #         categoryRanVal = random.randrange(0, len(nCategoryList) - 1)
-    #         nCategoryList[categoryRanVal].click()
+    
+    searchElement('#id')
+    focus_window('chrome')
+    wait_float(0.3,0.9)
+    while True:
+        
+        pg.click(400,500)
+        inputId = driver.find_element(by=By.CSS_SELECTOR, value="#id")
+        inputId.click()
+        wait_float(0.3,0.9)
+        cb.copy(ex.cell(exLineNum, 1).value)
+        wait_float(0.3,0.9)
+        pg.hotkey('ctrl', 'a')
+        wait_float(0.3,0.9)
+        pg.hotkey('ctrl', 'v')
+        inputId = driver.find_element(by=By.CSS_SELECTOR, value="#id")
+        if inputId.get_attribute('value') != "":
+            break
+        
+    while True:
+        inputPw = driver.find_element(by=By.CSS_SELECTOR, value="#pw")
+        inputPw.click()
+        wait_float(0.3,0.9)
+        cb.copy(ex.cell(exLineNum, 2).value)
+        wait_float(0.3,0.9)
+        pg.hotkey('ctrl', 'a')
+        wait_float(0.3,0.9)
+        pg.hotkey('ctrl', 'v')
+        inputPw = driver.find_element(by=By.CSS_SELECTOR, value="#pw")
+        if inputPw.get_attribute('value') != "":
+            break
+    
+    btnLogin = searchElement('.btn_login')
+    btnLogin[0].click()
+    
+    while True:
+        try:
+            WebDriverWait(driver, 6).until(EC.presence_of_element_located((By.CSS_SELECTOR, "#query")))
+            break
+        except:
+            driver.get('https://www.naver.com')
 
-    #         wait_float(0.5, 0.9)
+        
+    # cb.copy(ex.cell(exLineNum, 1).value)
+    # pg.alert('아이디가 복사되었습니다. 붙여넣기 해주세요')
+    
+    # cb.copy(ex.cell(exLineNum, 2).value)
+    # pg.alert('비밀번호가 복사되었습니다. 네이버 메인 화면에서 엔터를 클릭해주세요!')
+    
+    navItem = searchElement('.nav_item')
+    for mitem in navItem:
+        if mitem.text == '블로그':
+            mitem.click()
+            break
+    
+    menu_my_blog = searchElement('.menu_my_blog .item')
+    menu_my_blog[0].click()
+    
+    driver.switch_to.window(driver.window_handles[1])
+    driver.switch_to.frame('mainFrame')
+    
+    getUrl = searchElement('._transPosition')
+    getUrl[0].click()
+    wait_float(1.5,2.5)
+    pg.press('enter')
+    driver.switch_to.default_content()
+    driver.close()
+    driver.switch_to.window(driver.window_handles[0])
+    
+    goToNaverMain = searchElement('.link_naver')
+    goToNaverMain[0].click()
+    
+    blogReplyWork()
+    
+    
+    
+    # link_naver
+    # nav_item
+    pg.alert('대기~~~')
 
-    #         paginationNum = driver.find_elements(by=By.CSS_SELECTOR, value='.pagination span')
-    #         driver.execute_script("arguments[0].scrollIntoView();", paginationNum[0])
-    #         paginationRanVal = random.randrange(0, len(paginationNum) -1)
-    #         getClickPage = paginationNum[paginationRanVal].find_element(by=By.CSS_SELECTOR, value='a')
-    #         getClickPage.click()
-    #         wait_float(0.5, 0.9)
 
-    #         infoPostList = driver.find_elements(by=By.CSS_SELECTOR, value='.info_post')
-    #         infoPostRanVal = random.randrange(0, len(infoPostList) - 1)
-    #         getInfoPostTag_a = infoPostList[infoPostRanVal].find_element(by=By.CSS_SELECTOR, value='.desc a')
-    #         getInfoPostLink = getInfoPostTag_a.get_attribute('href')
-    #         getInfoPostLink = getInfoPostLink.replace('//', '//m.')
-    #     except:
-    #         driver.refresh()
-    #         focus_window('chrome')
-    #         pg.press('F5')
-    #         wait_float(2.5,3.5)
-    #         continue
+
+
+def blogReplyWork():
+    navItem = searchElement('.nav_item')
+    for mitem in navItem:
+        if mitem.text == '카페':
+            mitem.click()
+            break
+    
+    cafeList = searchElement('.user_mycafe_info')
+    getInCafe = ""
+    for cafeOn in cafeList:
+        if "소셜공간" in cafeOn.text:
+            cafeOn.click()
+            getInCafe = "on"
+            break
+    
+    if getInCafe == "":
+        driver.get('https://cafe.naver.com/sens3')
+    else:
+        driver.switch_to.window(driver.window_handles[0])
+        driver.close()
+        driver.switch_to.window(driver.window_handles[0])
+        
+    cafeWriteBtn = searchElement('.cafe-write-btn')
+    if "가입" in cafeWriteBtn[0].text:
+        pg.alert('카페 가입하기~~')
+    
+    workBoardLink = searchElement('#menuLink226')
+    workBoardLink[0].click()
+    
+    driver.switch_to.frame('cafe_main')
+    
+    workBoardWriteBtn = searchElement('#writeFormBtn')
+    workBoardWriteBtn[0].click()
+    
+    wait_float(1.5,2.5)
+    driver.switch_to.window(driver.window_handles[1])
+    
+    
+    subjectArea = searchElement('.FlexableTextArea')
+    subjectArea[0].click()
+    
+    with open('./etc/social_cafe_content.txt', 'r') as r:
+        cafeContent = r.readlines()
+    
+    keyboard.write(text=cafeContent[0], delay=0.05)
+    wait_float(0.3,0.9)
+    pg.moveTo(750,850)
+    wait_float(0.3,0.9)
+    pg.click()
+    wait_float(0.3,0.9)
+    pg.hotkey('ctrl', 'a')
+    
+    
+    workBlogLink = pyperclip.paste()
+    for i,conLine in enumerate(cafeContent):
+        if i == 0:
+            continue
+        keyboard.write(text=conLine, delay=0.03)
+    pg.press('enter')
+    pg.hotkey('ctrl', 'v')
+    wait_float(1.5,2.5)
+    BaseButton = searchElement('.BaseButton')
+    BaseButton[0].click()
+    
+    
+    wait_float(1.5,2.5)
+    driver.switch_to.frame('cafe_main')
+    
+    buttonUrl = searchElement('.button_url')
+    buttonUrl[0].click()
+    
+    wait_float(0.5,0.9)
+    driver.close()
+    
+    driver.switch_to.window(driver.window_handles[0])
+    
+    driver.switch_to.default_content()
+    
+    workBoardLink = searchElement('#menuLink226')
+    workBoardLink[0].click()
+    
+    
+    driver.switch_to.frame('cafe_main')
+    
+    articleDiff = searchElement('.article-board')
+    articleList = articleDiff[1].find_elements(by=By.CSS_SELECTOR, value=".td_article")
+    
+    for article in articleList:
+        pg.alert(article)
+        pg.alert(article.find_element(by=By.CSS_SELECTOR, value=".inner_number").text)
+        pg.alert(article.find_element(by=By.CSS_SELECTOR, value=".inner_list").text)
+        pg.alert(article.find_element(by=By.CSS_SELECTOR, value=".p-nick").text)
+        
+    
+    pg.alert(BaseButton)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    pg.alert(workBlogLink)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    # user_mycafe_info
+    
+    # cafe-write-btn
+    
+    # menuLink226
+    
+    # cafe_main 프레임
+    
+    # #writeFormBtn
+    
+    # _noticeArticle
+    
+    # article-board tr
+    
+    # td_name
+    
+    # board-list
+    
+    
+    # se-fs-
+    
+    
+    # CommentWriter 
+
+
+
+
+
+
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>함수 시작염
+
+# 상품 들어가서 스크롤 내리고 나오기
+
+def makeBlogContent():
     
     getInfoPostLink = 'https://m.blog.naver.com/overroad89/222696651375'
 
@@ -374,9 +623,7 @@ def makeBlogContent():
 
 
 
-# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>함수 시작염
 
-# 상품 들어가서 스크롤 내리고 나오기
 
 
 def makeContentArr(page):

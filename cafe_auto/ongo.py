@@ -250,7 +250,8 @@ def goScript(getDict):
 
             # 네이버 메인에서 카페 진입 시작!
             with open(f'./etc/useragent/useragent_all.txt') as f:
-                ua_data = f.readlines()[uaSet-1]
+                ua_data = f.readlines()[uaSet]
+                ua_data = ua_data.replace('\n', '')
 
             options = Options()
             user_agent = ua_data
@@ -428,7 +429,7 @@ def goScript(getDict):
         # ★★★★★★★★ 댓글 작성 시작!!
         if nowAction == 'reply':
             with open(f'./etc/useragent/useragent_all.txt') as f:
-                ua_data = f.readlines()[uaSet-1]
+                ua_data = f.readlines()[uaSet]
             options = Options()
             user_agent = ua_data
             options.add_argument('user-agent=' + user_agent)

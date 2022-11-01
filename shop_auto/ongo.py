@@ -79,19 +79,22 @@ def goScript(getDict):
         else:
             chk_login = 1
             load_id = ""
-
+        
         if chk_login != 1:
             while True:
                 wait_float(0.2, 0.5)
                 load_connect_info = id_excel.cell(allCount, 1).value
+                if load_connect_info is None:
+                    load_connect_info = getUaNum()
+                    link_excel.cell(allCount, 1).value = load_connect_info
+                    link_excel.save('./etc/naver_id.xlsx')
+                    
+                    
                 load_id = id_excel.cell(allCount, 2).value
                 load_pass = id_excel.cell(allCount, 3).value
 
                 if load_connect_info != '' and load_id != '' and load_pass != '':
                     break
-
-        # pg.alert(text=f'로그인 여부는? {chk_login}')
-        # pg.alert(text=f'UA정보 : {load_connect_info} / 아이디 : {load_id}/ 비번 : {load_pass}')
 
         # 로그인 준비 끝
 
@@ -143,13 +146,18 @@ def goScript(getDict):
 
         # 접속할 USER AGENT 설정
         if chk_login != 1:
-            connect_info = load_connect_info.split(',')
-            with open(f'./etc/useragent/useragent_{connect_info[0]}.txt') as f:
-                ua_data = f.readlines()[int(connect_info[1]) - 1]
+            # connect_info = load_connect_info.split(',')
+            # with open(f'./etc/useragent/useragent_{connect_info[0]}.txt') as f:
+            #     ua_data = f.readlines()[int(connect_info[1]) - 1]
+            with open(f'./etc/useragent/useragent_all.txt') as f:
+                ua_data = f.readlines()[load_connect_info]
+                ua_data = ua_data.replace('\n', '')
+                
         else:
             ua_data = linecache.getline(
                 './etc/useragent/useragent_all.txt', random.randrange(1, 14)).strip()
         # 설정 끝~ 접속하기
+
         options = Options()
         user_agent = ua_data
         options.add_argument('user-agent=' + user_agent)
@@ -170,6 +178,20 @@ def goScript(getDict):
                 idp_wb.save('./etc/naver_id.xlsx')
                 allCount += 1
                 continue
+            main_menus = searchElement(".shs_link")
+            for main_menu in main_menus:
+                if 'mail' in main_menu.get_attribute('href'):
+                    main_menu.click()
+                    break
+            wait_float(2.5, 3.5)
+            
+            while True:
+                wait_float(0.3, 0.5)
+                try:
+                    driver.find_element(by=By.CSS_SELECTOR, value='#MM_SEARCH_FAKE')
+                    break
+                except:
+                    driver.back()
         mainSearch = searchElement("#MM_SEARCH_FAKE")
         mainSearch[0].click()
 
@@ -195,6 +217,14 @@ def goScript(getDict):
             searchJisho(searchKeyword, driver)
 
             nShopCategory = searchElement(".mainFilter_option__c4_Lq")
+            
+            try:
+                UseLessBtn = driver.find_element(by=By.CSS_SELECTOR, value='.basicFilter_btn_close__qftDk svg')
+                UseLessBtn.click()
+            except:
+                pass
+            
+            
 
             setTong = link_excel.cell(workVal, 1).value
             if setTong is not None:
@@ -732,6 +762,12 @@ def changeIpSpeed():
 #     wait_float(0.5, 1.2)
 #     return selected_element
 
+def getUaNum():
+    with open("./etc/useragent/useragent_all.txt", "r") as f:
+        fArr = f.readlines()
+        fCount = len(fArr)
+        uaSet = random.randrange(0, fCount)
+    return uaSet
 
 def searchElement(ele):
     wait_float(0.3, 0.7)

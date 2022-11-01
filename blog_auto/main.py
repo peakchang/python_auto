@@ -3,7 +3,7 @@ from ongo import *
 
 
 def th():
-    getDict = {}
+    getDict = {'ipval': ipVal.get(),}
     getDict['nlist'] = idbox.current() + 1
     onth = threading.Thread(target=lambda: goScript(getDict))
     
@@ -14,6 +14,13 @@ def th2():
     onth = threading.Thread(makeBlogContent())
     onth.daemon = True
     onth.start()
+    
+def th3():
+    
+    getValList = {'nlist' : idbox.current() + 1}
+    onth = threading.Thread(blogReplyReady(getValList))
+    onth.daemon = True
+    onth.start()
 
 
 # 윈도우 창 생성 및 버튼 화면 조절
@@ -21,6 +28,16 @@ root = Tk()
 root.title("블로그 자동화 테스트")
 root.geometry("300x360+500+300")
 root.resizable(False, FALSE)
+
+frame0 = LabelFrame(root, text='아이피 변경', padx=60, pady=5)  # padx / pady 내부여백
+frame0.pack(padx=10, pady=5)  # padx / pady 외부여백
+
+ipVal = IntVar()
+ipChk1 = Radiobutton(frame0, text="아이피 변경", value=1, variable=ipVal)
+ipChk2 = Radiobutton(frame0, text="아이피 미변경", value=0, variable=ipVal)
+ipChk1.select()
+ipChk1.pack()
+ipChk2.pack()
 
 frame1 = LabelFrame(root, text='아이디 선택', padx=40, pady=20)  # padx / pady 내부여백
 frame1.pack(padx=10, pady=5)  # padx / pady 외부여백
@@ -38,8 +55,11 @@ btn1.pack()
 btn2 = Button(frame2, text='블로그 글따기', command=th2, padx=50)
 btn2.pack()
 
-btn3 = Button(frame2, text="종료하기", command=exitApp, padx=50)
+btn3 = Button(frame2, text="블로그 소셜", command=th3, padx=50)
 btn3.pack()
+
+btn4 = Button(frame2, text="종료하기", command=exitApp, padx=50)
+btn4.pack()
 
 
 wb = load_workbook('./etc/nid.xlsx')

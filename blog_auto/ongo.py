@@ -402,6 +402,7 @@ def blogReplyWork():
         if i == 0:
             continue
         keyboard.write(text=conLine, delay=0.03)
+        wait_float(0.5,1.5)
     pg.press('enter')
     pg.hotkey('ctrl', 'v')
     wait_float(1.5,2.5)
@@ -431,37 +432,63 @@ def blogReplyWork():
     articleDiff = searchElement('.article-board')
     articleList = articleDiff[1].find_elements(by=By.CSS_SELECTOR, value=".td_article")
     
+    workCafeLink = pyperclip.paste()
+    workCafeNum = workCafeLink.split('/')[-1]
+    preNick = ""
     for article in articleList:
-        pg.alert(article)
-        pg.alert(article.find_element(by=By.CSS_SELECTOR, value=".inner_number").text)
-        pg.alert(article.find_element(by=By.CSS_SELECTOR, value=".inner_list").text)
-        pg.alert(article.find_element(by=By.CSS_SELECTOR, value=".p-nick").text)
+        
+        pg.alert('대기~~~')
+        testEle1 = searchElement('.article-board')
+        pg.alert(testEle1)
+        
+        
+        
+        if str(workCafeNum) in article.find_element(by=By.CSS_SELECTOR, value=".board-number").text:
+            continue
+        
+        pg.alert(article.find_element(by=By.CSS_SELECTOR, value=".board-list").text)
+        article.find_element(by=By.CSS_SELECTOR, value=".board-list").click()
+        
+        
+        
+        nickname = searchElement('.nickname')
+        if preNick == nickname[0].text:
+            driver.back()
+            wait_float(2.1,3.7)
+            continue
+        else:
+            preNick = nickname[0].text
+        
+        pg.alert('대기~~~22222222')
+        
+        chkLinkTag = searchElement('.se-fs- a')
+        for chkLink in chkLinkTag:
+            getOtherBlogLink = chkLink.get_attribute('href')
+            if 'blog' in str(getOtherBlogLink):
+                chkOtherBlogLink = getOtherBlogLink.split('/')
+                if len(chkOtherBlogLink) < 5:
+                    pg.alert('블로그 링크가 잘못되었다!!')
+                    driver.back()
+                    wait_float(2.1,3.7)
+                    continue
+                else:
+                    chkLink.click()
+                break
+            
+        pg.alert('한바쿠 돌고 대기요~~~~')
+        
+        
+        
+        
+        
+        
+        
+        
         
     
     pg.alert(BaseButton)
     
-    
-    
-    
-    
-    
-    
-    
-    
-    pg.alert(workBlogLink)
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+ 
     
     
     # user_mycafe_info

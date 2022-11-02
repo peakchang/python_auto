@@ -64,8 +64,6 @@ def goScript(getDict):
             f.read()
             # print(f.read())
     
-    pg.alert('대기~')
-    
     
     exLineNum = getDict['nlist']
     wb = load_workbook('./etc/nid.xlsx')
@@ -90,18 +88,76 @@ def goScript(getDict):
     service = Service(ChromeDriverManager().install())
     options.add_argument(f"user-data-dir={user_data}")
     # options.add_argument('--profile-directory=Profile 3')
-    pg.alert('프로필을 선택해주세요!')
+    pg.alert('프로필을 선택해주세요! 그전에 글 / 댓글 바꿨는지 꼭 확인 하세요! 쫌 해!')
     driver = webdriver.Chrome(service=service, chrome_options=options)
     
     driver.get('https://www.naver.com')
+    
+    
+    
     loginBtn = searchElement('.sc_login')
     loginBtn[0].click()
     
-    cb.copy(ex.cell(exLineNum, 1).value)
-    pg.alert('아이디가 복사되었습니다. 붙여넣기 해주세요')
+    # cb.copy(ex.cell(exLineNum, 1).value)
+    # pg.alert('아이디가 복사되었습니다. 붙여넣기 해주세요')
     
-    cb.copy(ex.cell(exLineNum, 2).value)
-    pg.alert('비밀번호가 복사되었습니다. 로그인 후 블로그 작성 준비가 되면 엔터를 클릭해주세요!')
+    # cb.copy(ex.cell(exLineNum, 2).value)
+    # pg.alert('비밀번호가 복사되었습니다. 로그인 후 블로그 작성 준비가 되면 엔터를 클릭해주세요!')
+    
+    # while True:
+    
+    searchElement('#id')
+    focus_window('chrome')
+    wait_float(0.3,0.9)
+    while True:
+        
+        pg.click(400,500)
+        inputId = driver.find_element(by=By.CSS_SELECTOR, value="#id")
+        inputId.click()
+        wait_float(0.3,0.9)
+        cb.copy(ex.cell(exLineNum, 1).value)
+        wait_float(0.3,0.9)
+        pg.hotkey('ctrl', 'a')
+        wait_float(0.3,0.9)
+        pg.hotkey('ctrl', 'v')
+        inputId = driver.find_element(by=By.CSS_SELECTOR, value="#id")
+        if inputId.get_attribute('value') != "":
+            break
+        
+    while True:
+        inputPw = driver.find_element(by=By.CSS_SELECTOR, value="#pw")
+        inputPw.click()
+        wait_float(0.3,0.9)
+        cb.copy(ex.cell(exLineNum, 2).value)
+        wait_float(0.3,0.9)
+        pg.hotkey('ctrl', 'a')
+        wait_float(0.3,0.9)
+        pg.hotkey('ctrl', 'v')
+        inputPw = driver.find_element(by=By.CSS_SELECTOR, value="#pw")
+        if inputPw.get_attribute('value') != "":
+            break
+    
+    btnLogin = searchElement('.btn_login')
+    btnLogin[0].click()
+    
+    
+    while True:
+        try:
+            WebDriverWait(driver, 6).until(EC.presence_of_element_located((By.CSS_SELECTOR, "#query")))
+            break
+        except:
+            driver.get('https://www.naver.com')
+    
+    navItem = searchElement('.nav_item')
+    for mitem in navItem:
+        if mitem.text == '블로그':
+            mitem.click()
+            break
+    
+    menu_my_blog = searchElement('.menu_my_blog .item')
+    menu_my_blog[1].click()
+    
+    driver.switch_to.window(driver.window_handles[1])
     
     
     path_dir = './etc/content'
@@ -168,12 +224,25 @@ def goScript(getDict):
                 wait_float(0.5,0.9)
                 pg.press('enter')
                 wait_float(0.5,0.9)
-        pg.alert('글 작성 완료!! 다음글이 있을경우 글쓰기 준비를 해주세요!')
+        pg.alert('글 작성 완료!! 글쓰기 완료 버튼 클릭 후 확인을 눌러주세요!')
         
     
     chkVal = pg.confirm(text='글쓰기가 완료 되었습니다!! 댓글을 진행 하시겠습니까?', buttons=['go','stop'])
     if chkVal == 'go':
-        print('alsdjfliajsdflj')
+        getUrl = searchElement('._transPosition')
+        getUrl[0].click()
+        wait_float(1.5,2.5)
+        pg.press('enter')
+        driver.switch_to.default_content()
+        driver.close()
+        driver.switch_to.window(driver.window_handles[0])
+        
+        goToNaverMain = searchElement('.link_naver')
+        goToNaverMain[0].click()
+        pg.alert('일단 블로그 링크는 URL 복사 클릭 해주시고 네이버 메인에서 대기하세요!')
+        blogReplyWork()
+    else:
+        exitApp()
         
     
 # def makeBlogContent():
@@ -296,19 +365,15 @@ def blogReplyReady(getValList):
     btnLogin = searchElement('.btn_login')
     btnLogin[0].click()
     
+    pg.alert('대기요~~~~~')
+    # 블로그 링크따기
+    
     while True:
         try:
             WebDriverWait(driver, 6).until(EC.presence_of_element_located((By.CSS_SELECTOR, "#query")))
             break
         except:
             driver.get('https://www.naver.com')
-
-        
-    # cb.copy(ex.cell(exLineNum, 1).value)
-    # pg.alert('아이디가 복사되었습니다. 붙여넣기 해주세요')
-    
-    # cb.copy(ex.cell(exLineNum, 2).value)
-    # pg.alert('비밀번호가 복사되었습니다. 네이버 메인 화면에서 엔터를 클릭해주세요!')
     
     navItem = searchElement('.nav_item')
     for mitem in navItem:
@@ -333,13 +398,9 @@ def blogReplyReady(getValList):
     goToNaverMain = searchElement('.link_naver')
     goToNaverMain[0].click()
     
+    # 블로그 링크 따기 끝~~~
+    
     blogReplyWork()
-    
-    
-    
-    # link_naver
-    # nav_item
-    pg.alert('대기~~~')
 
 
 
@@ -375,6 +436,10 @@ def blogReplyWork():
     
     driver.switch_to.frame('cafe_main')
     
+    
+    
+    # 카페에 글 작성하기
+    
     workBoardWriteBtn = searchElement('#writeFormBtn')
     workBoardWriteBtn[0].click()
     
@@ -396,8 +461,6 @@ def blogReplyWork():
     wait_float(0.3,0.9)
     pg.hotkey('ctrl', 'a')
     
-    
-    workBlogLink = pyperclip.paste()
     for i,conLine in enumerate(cafeContent):
         if i == 0:
             continue
@@ -408,6 +471,8 @@ def blogReplyWork():
     wait_float(1.5,2.5)
     BaseButton = searchElement('.BaseButton')
     BaseButton[0].click()
+    
+    
     
     
     wait_float(1.5,2.5)
@@ -421,34 +486,48 @@ def blogReplyWork():
     
     driver.switch_to.window(driver.window_handles[0])
     
-    driver.switch_to.default_content()
     
-    workBoardLink = searchElement('#menuLink226')
-    workBoardLink[0].click()
-    
-    
-    driver.switch_to.frame('cafe_main')
-    
-    articleDiff = searchElement('.article-board')
-    articleList = articleDiff[1].find_elements(by=By.CSS_SELECTOR, value=".td_article")
     
     workCafeLink = pyperclip.paste()
     workCafeNum = workCafeLink.split('/')[-1]
     preNick = ""
-    for article in articleList:
+    
+    # 카페에 글 작성하기 끝~
+    
+    
+    
+    
+    forVal = random.randrange(6,8)
+    
+    ici = 0
+    while True:
+        ici += 1
+        driver.switch_to.default_content()
         
-        pg.alert('대기~~~')
-        testEle1 = searchElement('.article-board')
-        pg.alert(testEle1)
+        wait_float(0.3,0.9)
+        workBoardLink = searchElement('#menuLink226')
+        workBoardLink[0].click()
+        
+        wait_float(0.3,0.9)
+        
+        driver.switch_to.frame('cafe_main')
+        
+        wait_float(0.3,0.9)
+        
+        articleDiff = searchElement('.article-board')
+        articleList = articleDiff[1].find_elements(by=By.CSS_SELECTOR, value=".td_article")
         
         
         
-        if str(workCafeNum) in article.find_element(by=By.CSS_SELECTOR, value=".board-number").text:
+        if str(workCafeNum) in articleList[ici].find_element(by=By.CSS_SELECTOR, value=".board-number").text:
+            forVal = forVal + 1
             continue
         
-        pg.alert(article.find_element(by=By.CSS_SELECTOR, value=".board-list").text)
-        article.find_element(by=By.CSS_SELECTOR, value=".board-list").click()
-        
+        wait_float(0.3,0.9)
+        clickArticleTarget = articleList[ici].find_element(by=By.CSS_SELECTOR, value=".article")
+        wait_float(0.3,0.9)
+        # clickArticleTarget.click()
+        untilEleShow(clickArticleTarget, '.nickname')
         
         
         nickname = searchElement('.nickname')
@@ -459,34 +538,81 @@ def blogReplyWork():
         else:
             preNick = nickname[0].text
         
-        pg.alert('대기~~~22222222')
-        
-        chkLinkTag = searchElement('.se-fs- a')
+        chkLinkTag = driver.find_elements("xpath", "//*[contains(@class, 'se-fs-')]")
+
         for chkLink in chkLinkTag:
-            getOtherBlogLink = chkLink.get_attribute('href')
-            if 'blog' in str(getOtherBlogLink):
-                chkOtherBlogLink = getOtherBlogLink.split('/')
-                if len(chkOtherBlogLink) < 5:
-                    pg.alert('블로그 링크가 잘못되었다!!')
-                    driver.back()
-                    wait_float(2.1,3.7)
-                    continue
-                else:
-                    chkLink.click()
-                break
-            
-        pg.alert('한바쿠 돌고 대기요~~~~')
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    
-    pg.alert(BaseButton)
+            try:
+                getOtherBlogLink = chkLink.find_element(by=By.CSS_SELECTOR, value="a").get_attribute('href')
+                if 'blog' in str(getOtherBlogLink):
+                    chkOtherBlogLink = getOtherBlogLink.split('/')
+                    if len(chkOtherBlogLink) < 5:
+                        forVal = forVal + 1
+                        driver.back()
+                        wait_float(2.1,3.7)
+                        break
+                    else:
+                        
+                        chkLink.click()
+                        
+                        if 'm.' in getOtherBlogLink:
+                            wait_float(0.3,0.9)
+                            driver.switch_to.window(driver.window_handles[1])
+                            driver.switch_to.default_content()
+                            gongamBtn = searchElement('.u_ico')
+                            wait_float(0.3,0.9)
+                            gongamBtn[-1].click()
+                            wait_float(0.3,0.9)
+                            driver.close()
+                            wait_float(0.3,0.9)
+                            driver.switch_to.window(driver.window_handles[0])
+                            wait_float(0.3,0.9)
+                            
+                        else:
+                            wait_float(0.3,0.9)
+                            driver.switch_to.window(driver.window_handles[1])
+                            driver.switch_to.default_content()
+                            wait_float(0.3,0.9)
+                            driver.switch_to.frame('mainFrame')
+                            wait_float(0.3,0.9)
+                            gongamBtn = searchElement('.u_ico')
+                            gongamBtn[1].click()
+                            wait_float(0.5,1.5)
+                            driver.switch_to.default_content()
+                            wait_float(0.3,0.9)
+                            driver.close()
+                            wait_float(0.3,0.9)
+                            driver.switch_to.window(driver.window_handles[0])
+                            wait_float(0.3,0.9)
+                        
+                        driver.switch_to.frame('cafe_main')
+                        replyArea = searchElement('.comment_inbox_text')
+                        replyArea[0].click()
+                        replyArea[0].send_keys('^0^')
+                        pg.press('space')
+                        
+                        for i,conLine in enumerate(cafeContent):
+                            if i == 0:
+                                continue
+                            keyboard.write(text=conLine, delay=0.03)
+                            wait_float(0.5,1.5)
+                        pg.press('enter')
+                        pg.hotkey('ctrl', 'v')
+                        wait_float(1.5,2.5)
+                        
+                        replySuccessBtn = searchElement('.btn_register')
+                        driver.execute_script("arguments[0].scrollIntoView();", replySuccessBtn[0])
+                        replySuccessBtn[0].click()
+                        wait_float(5.5,7.5)
+                        
+                        driver.back()
+                        break
+            except:
+                pass
+        if ici >= forVal:
+            break
+    pg.alert('작업이 완료 되었습니다.')
+    pg.alert('끝내시겠습니까?')
+    exitApp()
     
  
     

@@ -494,7 +494,7 @@ def goScript(getDict):
             randomActionVal = random.randrange(1, 4)
             print(randomActionVal)
             if randomActionVal == 1:
-
+                
                 # 댓글 작성 전 창 체크
                 replyGoBtn = searchElement('.f_reply')
                 untilEleShow(replyGoBtn[0], '.HeaderIcon')

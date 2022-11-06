@@ -51,20 +51,6 @@ def goScript(getDict):
     global driver
     
     
-    
-    
-    
-    
-    files = sorted(glob.glob('.\\etc\\content\\*.txt'), key=os.path.getctime)
-    for file in files:
-        print(file)
-        setFileName = file.replace('.\\etc\\content\\', '')
-        print(setFileName)
-        with open(file, 'r') as f:
-            f.read()
-            # print(f.read())
-    
-    
     exLineNum = getDict['nlist']
     wb = load_workbook('./etc/nid.xlsx')
     ex = wb.active
@@ -76,6 +62,9 @@ def goScript(getDict):
         while True:
             getIP = changeIp()
             print(getIP)
+            if getIP == '119.197.60.174':
+                pg.alert('집 아이피 입니다!')
+                continue
             if not preIp == getIP:
                 preIp = getIP
                 break
@@ -87,12 +76,13 @@ def goScript(getDict):
     user_data = 'C:\\Users\\pcy\\AppData\\Local\\Google\\Chrome\\User Data\\default'
     service = Service(ChromeDriverManager().install())
     options.add_argument(f"user-data-dir={user_data}")
-    # options.add_argument('--profile-directory=Profile 3')
-    pg.alert('프로필을 선택해주세요! 그전에 글 / 댓글 바꿨는지 꼭 확인 하세요! 쫌 해!')
+    options.add_argument(f'--profile-directory={ex.cell(exLineNum, 3).value}')
     driver = webdriver.Chrome(service=service, chrome_options=options)
     
     driver.get('https://www.naver.com')
     
+    # chrome://version
+    # pg.alert('대기~')
     
     
     loginBtn = searchElement('.sc_login')
@@ -140,13 +130,18 @@ def goScript(getDict):
     btnLogin = searchElement('.btn_login')
     btnLogin[0].click()
     
-    
     while True:
         try:
             WebDriverWait(driver, 6).until(EC.presence_of_element_located((By.CSS_SELECTOR, "#query")))
             break
         except:
             driver.get('https://www.naver.com')
+    
+    chkVal = pg.confirm(text='댓글순방을 진행하겠습니까?', buttons=['go','stop'])
+    if chkVal == 'go':
+        allowListVisit()
+    else:
+        pass
     
     navItem = searchElement('.nav_item')
     for mitem in navItem:
@@ -166,65 +161,67 @@ def goScript(getDict):
     
     
     
-    files = sorted(glob.glob('.\\etc\\content\\*.txt'), key=os.path.getctime)
-    writeCount = 0
-    for file in files:
-        writeCount += 1
-        pg.alert(f'{writeCount}번째 글쓰기를 시작합니다!!')
-        # driver.to_switch()
-        driver.switch_to.window(driver.window_handles[1])
+    # files = sorted(glob.glob('.\\etc\\content\\*.txt'), key=os.path.getctime)
+
+    # writeCount += 1
+    pg.alert(f'글쓰기를 시작합니다!!')
+    # driver.to_switch()
+    driver.switch_to.window(driver.window_handles[1])
+    
+    driver.switch_to.frame('mainFrame')
+    
+    writeArea = searchElement('.se-component-content')
+    
+    with open('./content/content.txt', 'r') as f:
+        getLines = f.readlines()
         
-        driver.switch_to.frame('mainFrame')
-        
-        writeArea = searchElement('.se-component-content')
-        
-        with open(file, 'r') as f:
-            getLines = f.readlines()
+    for i, getline in enumerate(getLines):
+        focus_window('블로그')
+        getline = getline.replace('\n', '')
+        chkImg = getline.split('|')
+        if chkImg[0] == 'img_line':
+            nowPath = os.getcwd()
             
-        for i, getline in enumerate(getLines):
-            focus_window('블로그')
-            getline = getline.replace('\n', '')
-            chkImg = getline.split('|')
-            if chkImg[0] == 'img_line':
-                nowPath = os.getcwd()
-                
-                img_btn = searchElement('.se-image-toolbar-button')
-                img_btn[0].click()
-                wait_float(1.5,2.3)
-                
-                imagePath = nowPath + f"\etc\content"
-                wait_float(1.5, 2.2)
-                pyperclip.copy(imagePath)
-                wait_float(0.5, 0.9)
-                pg.hotkey('ctrl','v')
-                wait_float(0.5, 0.9)
-                pg.press('enter')
-                
-                wait_float(0.9, 1.6)
-                pyperclip.copy(chkImg[1])
-                wait_float(0.5, 0.9)
-                pg.hotkey('ctrl','v')
-                wait_float(0.5, 0.9)
-                pg.press('enter')
-                wait_float(3.5,4.5)
-                continue
+            img_btn = searchElement('.se-image-toolbar-button')
+            img_btn[0].click()
+            wait_float(1.5,2.3)
             
-            if i == 0:
-                writeArea[0].click()
-                keyboard.write(text=getline, delay=0.05)
-                wait_float(1.2,2.8)
-            elif i == 1:
-                writeArea[1].click()
-                keyboard.write(text=getline, delay=0.05)
-                wait_float(0.5,0.9)
-                pg.press('enter')
-                wait_float(0.5,0.9)
-            else:
-                keyboard.write(text=getline, delay=0.05)
-                wait_float(0.5,0.9)
-                pg.press('enter')
-                wait_float(0.5,0.9)
-        pg.alert('글 작성 완료!! 글쓰기 완료 버튼 클릭 후 확인을 눌러주세요!')
+            imagePath = nowPath + f"\content"
+            wait_float(1.5, 2.2)
+            pyperclip.copy(imagePath)
+            wait_float(0.5, 0.9)
+            pg.hotkey('ctrl','v')
+            wait_float(0.5, 0.9)
+            pg.press('enter')
+            
+            wait_float(0.9, 1.6)
+            pyperclip.copy(chkImg[1])
+            wait_float(0.5, 0.9)
+            pg.hotkey('ctrl','v')
+            wait_float(0.5, 0.9)
+            pg.press('enter')
+            wait_float(3.5,4.5)
+            continue
+        
+        if i == 0:
+            writeArea[0].click()
+            keyboard.write(text=getline, delay=0.05)
+            wait_float(1.2,2.8)
+        elif i == 1:
+            writeArea[1].click()
+            keyboard.write(text=getline, delay=0.05)
+            wait_float(0.5,0.9)
+            pg.press('enter')
+            wait_float(0.5,0.9)
+        else:
+            keyboard.write(text=getline, delay=0.05)
+            wait_float(0.5,0.9)
+            pg.press('enter')
+            wait_float(0.5,0.9)
+    pg.alert('글 작성 완료!! 글쓰기 완료 버튼 클릭 후 확인을 눌러주세요!')
+    
+    # se-help-panel-close-button
+    # publish_btn__Y5mLP
         
     
     chkVal = pg.confirm(text='글쓰기가 완료 되었습니다!! 댓글을 진행 하시겠습니까?', buttons=['go','stop'])
@@ -244,6 +241,112 @@ def goScript(getDict):
     else:
         exitApp()
         
+
+
+def allowListVisit():
+    navItem = searchElement('.nav_item')
+    for mitem in navItem:
+        if mitem.text == '블로그':
+            mitem.click()
+            break
+    
+    menu_my_blog = searchElement('.menu_my_blog .item')
+    menu_my_blog[0].click()
+    
+    driver.switch_to.window(driver.window_handles[1])
+    driver.switch_to.frame('mainFrame')
+    
+    getUrl = searchElement('._transPosition')
+    getUrl[0].click()
+    wait_float(1.5,2.5)
+    pg.press('enter')
+    
+    nowBlogLink = pyperclip.paste()
+    nowBlogLinkSplit = nowBlogLink.split('/')
+    
+    openVisitListBtn = searchElement(f'#Sympathy{nowBlogLinkSplit[-1]} .bu_arr')
+    openVisitListBtn[0].click()
+    
+    wait_float(1.5,2.5)
+    
+    driver.switch_to.frame('sympathyFrm222900264536')
+    visitList = searchElement('.wrap_blog2_sympathy .nick')
+    
+    for visitCount in range(len(visitList)):
+        
+        driver.switch_to.default_content()
+        wait_float(0.3,0.9)
+        driver.switch_to.frame('mainFrame')
+        wait_float(0.3,0.9)
+        driver.switch_to.frame('sympathyFrm222900264536')
+        wait_float(0.3,0.9)
+        visitList = searchElement('.wrap_blog2_sympathy .nick')
+        print(visitList[visitCount].text)
+        visitList[visitCount].click()
+        
+        wait_float(0.7,1.2)
+        driver.switch_to.window(driver.window_handles[2])
+        wait_float(0.7,1.2)
+        driver.switch_to.default_content()
+        driver.switch_to.frame('mainFrame')
+        postListOpenBtn = searchElement('#toplistSpanBlind')
+        
+        while True:
+            print(postListOpenBtn[0].text)
+            if postListOpenBtn[0].text == '목록닫기':
+                break
+            else:
+                wait_float(0.5,1.3)
+                postListOpenBtn[0].click()
+        wait_float(1.5,2.5)
+        postList = searchElement('.blog2_categorylist')
+        
+        for getPostLinkCount in range(3):
+            try:
+                getPostLink = postList[getPostLinkCount].find_element(by=By.CSS_SELECTOR, value=".ell2")
+                break
+            except:
+                pass
+        
+        getPostLink.click()
+        wait_float(1.3,2.5)
+        
+        
+        gongamBtn = driver.find_element(by=By.CSS_SELECTOR, value='.u_likeit_list_btn')
+        getGonggamStatus = gongamBtn.get_attribute('aria-pressed')
+        print(getGonggamStatus)
+        if getGonggamStatus == 'false':
+            gongamBtn = searchElement('.u_ico')
+            wait_float(0.3,0.9)
+            gongamBtn[-1].click()
+        else:
+            pass
+
+        
+        # gongamBtn[1].click()
+        wait_float(0.5,1.5)
+        driver.close()
+        wait_float(0.3,0.9)
+        driver.switch_to.window(driver.window_handles[1])
+        wait_float(0.3,0.9)
+        
+        
+    driver.close()
+    wait_float(0.3,0.9)
+    driver.switch_to.window(driver.window_handles[0])
+    wait_float(0.3,0.9)
+    driver.switch_to.default_content()
+    
+    goToMain = searchElement('.link_naver')
+    goToMain[0].click()
+    
+    while True:
+        try:
+            WebDriverWait(driver, 6).until(EC.presence_of_element_located((By.CSS_SELECTOR, "#query")))
+            break
+        except:
+            driver.get('https://www.naver.com')
+            
     
 # def makeBlogContent():
     

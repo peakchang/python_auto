@@ -243,8 +243,9 @@ def goScript(getDict):
 
             blogTime = blog_end - blog_start
             additional_time = f'블로그 글따는 시간: ({blogTime})\n'
-            
-            # 모바일 버전 일반 글쓰기 시작~~~~
+
+        if nowAction == 'write':
+
             nLoginTimeStart = time.time()
 
             # 네이버 메인에서 카페 진입 시작!
@@ -392,7 +393,15 @@ def goScript(getDict):
             getLink[3].click()
 
             getLinkData = cb.paste()
-            
+            if nowWriteStatus == 'optimize':
+                with open(f'./etc/content/id_{writeCount}/reply.txt', 'r') as f:
+                    getTempReplys = f.readlines()
+                    getTempReplys.insert(0, '0\n')
+                    getTempReplysName_temp = getLinkData.split('/')
+                    getTempReplysName = getTempReplysName_temp[-1]
+                with open(f'./etc/content/temp_reply/{getTempReplysName}.txt', 'w') as f:
+                    f.writelines(''.join(getTempReplys))
+
             with open('./etc/work_link.txt', 'a') as f:
                 f.write('\n')
                 f.write(getLinkData)
@@ -416,21 +425,6 @@ def goScript(getDict):
 
             additional_time = additional_time + \
                 f' 글 작성 시간 : ({cafeWriteTime})\n'
-            
-
-        if nowAction == 'write' and nowWriteStatus == 'optimize':
-            
-            if nowWriteStatus == 'optimize':
-                with open(f'./etc/content/id_{writeCount}/reply.txt', 'r') as f:
-                    getTempReplys = f.readlines()
-                    getTempReplys.insert(0, '0\n')
-                    getTempReplysName_temp = getLinkData.split('/')
-                    getTempReplysName = getTempReplysName_temp[-1]
-                with open(f'./etc/content/temp_reply/{getTempReplysName}.txt', 'w') as f:
-                    f.writelines(''.join(getTempReplys))
-            pass
-
-            
 
         # ★★★★★★★★ 댓글 작성 시작!!
         if nowAction == 'reply':
@@ -468,7 +462,7 @@ def goScript(getDict):
         else:
             goToHome = searchElement('.header h1')
             untilEleGone(goToHome[0], '.post_title')
-            
+
         # 카페 메인 진입 끝! 게시글 클릭 시작!
         nowWriteStatus = ''
         with open(f'./etc/work_link.txt') as f:

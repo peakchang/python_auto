@@ -423,8 +423,7 @@ def blogReplyReady(getValList):
     user_data = 'C:\\Users\\pcy\\AppData\\Local\\Google\\Chrome\\User Data\\default'
     service = Service(ChromeDriverManager().install())
     options.add_argument(f"user-data-dir={user_data}")
-    # options.add_argument('--profile-directory=Profile 3')
-    pg.alert('프로필을 선택해주세요!')
+    options.add_argument(f'--profile-directory={ex.cell(exLineNum, 3).value}')
     driver = webdriver.Chrome(service=service, chrome_options=options)
     
     driver.get('https://www.naver.com')
@@ -755,7 +754,7 @@ def blogReplyWork():
 
 def makeBlogContent():
     
-    getInfoPostLink = 'https://m.blog.naver.com/overroad89/222696651375'
+    getInfoPostLink = 'https://m.blog.naver.com/smk0107/222007822636'
 
     page = requests.get(getInfoPostLink)
     soup = bs(page.text, "html.parser")

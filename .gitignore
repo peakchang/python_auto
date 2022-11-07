@@ -12,3 +12,5 @@ dist/
 
 cafe_auto/etc/content
 blog_auto/etc/content
+cafe_auto/content
+blog_auto/content

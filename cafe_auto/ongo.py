@@ -55,7 +55,13 @@ cafe_id.cell(세로(열), 가로(행)).value
 
 
 def goScript(getDict):
-
+    
+    testval = '가나다'
+    testarr = ['가나다','나나나','다다다']
+    if testval in testarr:
+        pg.alert('포함')
+    else:
+        pg.alert('안포함~~~~~')
     global driver
 
     cafe_optimize_file = load_workbook('./etc/naver_optimiz.xlsx')
@@ -1096,8 +1102,11 @@ def getBlogContentChrome(subjectArr):
             driver.find_element(by=By.CSS_SELECTOR, value='.rzG2be').send_keys(chkThreeyearAgo)
             wait_float(0.8,1.5)
             pg.press('enter')
-    
-
+            
+        try:
+            driver.find_element(by=By.CSS_SELECTOR, value='.NVbCr')
+        except:
+            continue
         getPagingList = searchElement('.NVbCr')
         if len(getPagingList) < 2:
             continue
@@ -1112,11 +1121,20 @@ def getBlogContentChrome(subjectArr):
         getInfoPostLink = getBlogLink[getBlogLinkCount].find_element(by=By.CSS_SELECTOR, value='a').get_attribute('href')
         if '//m.' not in getInfoPostLink:
             getInfoPostLink = getInfoPostLink.replace('//', '//m.')
-        
-        
+
+
         page = requests.get(getInfoPostLink)
         soup = bs(page.text, "html.parser")
         elements = soup.select('.se-module.se-module-text')
+        
+        # se-title-text 제목
+        
+        getSubjectEle = soup.select('.se-title-text')
+        getSubject = str(getSubjectEle[0])
+        
+        getSubject = getSubject.split('-->')[-2].replace('','').split('<!--')[0]
+        getSubject = re.sub(r"[^\uAC00-\uD7A3\s]", "", getSubject)
+        getSubjectArr = getSubject.replace('  ', ' ').split(' ')
 
         allStr = []
         for ele in elements:
@@ -1126,6 +1144,7 @@ def getBlogContentChrome(subjectArr):
 
         p_str = re.compile(r'[a-zA-Z0-9,|\n]+')
         p_space = re.compile('\s\s')
+
 
         for i in range(1, len(allStr)):
             for j, strin in enumerate(allStr):
@@ -1140,12 +1159,33 @@ def getBlogContentChrome(subjectArr):
                 if strin == " ":
                     allStr.pop(j)
                     break
-        allStr = "".join(allStr)
+        
+        getAllStr = []
+        for strOn in allStr:
+            addVal = ''
+            for tempsub in getSubjectArr:
+                if len(tempsub) < 2:
+                    continue
+                if tempsub in strOn:
+                    addVal = ''
+                    break
+                addVal = 'on'
+            
+            if addVal == 'on':
+                getAllStr.append(strOn)
+        
+        
+        
+        
+        allStr = " ".join(getAllStr)
+        
         if len(allStr) < 400:
             continue
-        if len(allStr) > 700:
-            sliceRanNum = random.randrange(600, 700)
+        if len(allStr) > 600:
+            sliceRanNum = random.randrange(400, 600)
             allStr = allStr[0:sliceRanNum]
+            
+        # 제목에 들어간 단어들 삭제하기
         break
 
     resetStrArr = allStr.split(' ')
@@ -1160,7 +1200,7 @@ def getBlogContentChrome(subjectArr):
 
         for inon in resetOn:
             changeRanCount = random.randrange(0, len(subjectArr))
-            chkChangeRan = random.randrange(1, 6)
+            chkChangeRan = random.randrange(1, 4)
             if chkChangeRan == 1:
                 try:
                     resetList[inon - 1] = subjectArr[changeRanCount]
@@ -1180,6 +1220,8 @@ def getBlogContentChrome(subjectArr):
     for i, setList in enumerate(resetListArr):
         if imgLineCount == i:
             allContent = allContent + 'img_line|randomimg\n'
+            insubject = " ".join(subjectArr)
+            allContent = allContent + insubject + '\n'
         for setStr in setList:
             if setStr == '':
                 continue
@@ -1187,9 +1229,11 @@ def getBlogContentChrome(subjectArr):
                 continue
             allContent = allContent + setStr
             allContent = allContent + ' '
-        allContent = allContent + '\n'
         
-    pg.alert(allContent)
+        if len(resetListArr)-1 != i:
+            allContent = allContent + '\n'
+        
+    allContent = allContent + subjectArr[-1]
 
     driver.close()
     return allContent

@@ -11,7 +11,9 @@ def th():
     onth.start()
 
 def th2():
-    onth = threading.Thread(target=lambda: makeBlogContent(textbox.get()))
+    getDict = {'nlist' : idbox.current() + 1 , 'getText' :  textbox.get()}
+    
+    onth = threading.Thread(target=lambda: blogRankChk(getDict))
     onth.daemon = True
     onth.start()
     
@@ -54,7 +56,7 @@ frame3.pack(padx=10, pady=5)  # padx / pady 외부여백
 btn1 = Button(frame2, text='블로그 자동화', command=th, padx=50)
 btn1.pack()
 
-btn2 = Button(frame2, text='블로그 글따기', command=th2, padx=50)
+btn2 = Button(frame2, text='블로그 랭크', command=th2, padx=50)
 btn2.pack()
 
 btn3 = Button(frame2, text="블로그 소셜", command=th3, padx=50)

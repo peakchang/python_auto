@@ -82,7 +82,7 @@ def goScript(getDict):
     driver.get('https://www.naver.com')
     
     # chrome://version
-    # pg.alert('대기~')
+    pg.alert('대기~')
     
     
     loginBtn = searchElement('.sc_login')
@@ -244,6 +244,8 @@ def goScript(getDict):
 
 
 def allowListVisit():
+    
+    pg.alert('대기~!')
     navItem = searchElement('.nav_item')
     for mitem in navItem:
         if mitem.text == '블로그':
@@ -255,6 +257,13 @@ def allowListVisit():
     
     driver.switch_to.window(driver.window_handles[1])
     driver.switch_to.frame('mainFrame')
+    
+    wait_float(1.5,2.5)
+    try:
+        closePopupBtn = driver.find_element(by=By.CSS_SELECTOR, value=".popup_da_btn_area ._btn_close")
+        closePopupBtn.click()
+    except:
+        pass
     
     getUrl = searchElement('._transPosition')
     getUrl[0].click()
@@ -269,7 +278,7 @@ def allowListVisit():
     
     wait_float(1.5,2.5)
     
-    driver.switch_to.frame('sympathyFrm222900264536')
+    driver.switch_to.frame(f'sympathyFrm{nowBlogLinkSplit[-1]}')
     visitList = searchElement('.wrap_blog2_sympathy .nick')
     
     for visitCount in range(len(visitList)):
@@ -278,7 +287,7 @@ def allowListVisit():
         wait_float(0.3,0.9)
         driver.switch_to.frame('mainFrame')
         wait_float(0.3,0.9)
-        driver.switch_to.frame('sympathyFrm222900264536')
+        driver.switch_to.frame(f'sympathyFrm{nowBlogLinkSplit[-1]}')
         wait_float(0.3,0.9)
         visitList = searchElement('.wrap_blog2_sympathy .nick')
         print(visitList[visitCount].text)
@@ -290,6 +299,9 @@ def allowListVisit():
         driver.switch_to.default_content()
         driver.switch_to.frame('mainFrame')
         postListOpenBtn = searchElement('#toplistSpanBlind')
+        
+        
+        # 여기서 블로그 말고 프롤로그면 블로그 클릭하게 하기
         
         while True:
             print(postListOpenBtn[0].text)
@@ -752,9 +764,12 @@ def blogReplyWork():
 
 # 상품 들어가서 스크롤 내리고 나오기
 
-def makeBlogContent():
+def makeBlogContent(getInfoPostLink):
     
-    getInfoPostLink = 'https://m.blog.naver.com/smk0107/222007822636'
+    if '//m.' not in getInfoPostLink:
+        getInfoPostLink = getInfoPostLink.replace('//', '//m.')
+    
+    print(type(getInfoPostLink))
 
     page = requests.get(getInfoPostLink)
     soup = bs(page.text, "html.parser")

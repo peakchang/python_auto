@@ -1031,63 +1031,168 @@ def mainToCafe():
 
 
 def getBlogContentChrome(subjectArr):
-    pg.alert('함수 진입 대기~~~')
-    
+   
     with open('./etc/find_keyword.txt', 'r') as r:
         allKeyword = r.readlines()
-    
-    keyCount = random.randrange(0, len(allKeyword))
-    getKeyword = allKeyword[keyCount]
-    getKeyword = getKeyword.replace('\n', '')
-    print(getKeyword)
+        
     driver.get('https://www.google.com/')
     
     
-    searchBar = searchElement('.gLFyf')
-    wait_float(0.5,0.8)
-    searchBar[0].click()
-    wait_float(0.5,0.8)
-    searchBar[0].send_keys(f'site:blog.naver.com {getKeyword}')
-    pg.press('enter')
-    wait_float(0.8,1.5)
-    pg.press('enter')
-    
-    
-    
-    getTools = searchElement('.t2vtad')
-    getTools[0].click()
-    wait_float(0.8,1.5)
-    
-    getToolsIf = searchElement('.KTBKoe')
-    for getToolsIfOn in getToolsIf:
-        if '날짜' in getToolsIfOn.text:
-            getToolsIfOn.click()
-    wait_float(0.8,1.5)
+    searchCount = 0
+    while True:
+        searchCount += 1
+        keyCount = random.randrange(0, len(allKeyword))
+        getKeyword = allKeyword[keyCount]
+        getKeyword = getKeyword.replace('\n', '')
+        searchBar = searchElement('.gLFyf.gsfi')
+        wait_float(0.5,0.8)
+        searchBar[-1].click()
+        wait_float(0.5,0.8)
+        searchBar[-1].clear()
+        wait_float(0.5,0.8)
+        searchBar[-1].send_keys(f'site:blog.naver.com {getKeyword}')
+        pg.press('enter')
+        wait_float(0.8,1.5)
+        pg.press('enter')
+        
+        nowpage = 0
+        if searchCount == 1:
+            getTools = searchElement('.t2vtad')
+            getTools[0].click()
+            wait_float(0.3,0.9)
             
-    getPeriodIf = searchElement('.y0fQ9c')
-    for getPeriodIfOn in getPeriodIf:
-        if '설정' in getPeriodIfOn.text:
-            getPeriodIfOn.click()
-    wait_float(0.8,1.5)
-    
-    today = datetime.today()
-    print(today)
+            getToolsIf = searchElement('.KTBKoe')
+            for getToolsIfOn in getToolsIf:
+                if '날짜' in getToolsIfOn.text:
+                    getToolsIfOn.click()
+            wait_float(0.3,0.9)
+                    
+            getPeriodIf = searchElement('.y0fQ9c')
+            for getPeriodIfOn in getPeriodIf:
+                if '설정' in getPeriodIfOn.text:
+                    getPeriodIfOn.click()
+            wait_float(0.3,0.9)
+            
+            today = datetime.today()
+            print(today)
+            
+            before_one_year = today - relativedelta(years=3)
 
-    this_month_first = datetime(today.year, today.month, 1)
-    chkMonthFirst = this_month_first.strftime('%m/%d/%Y')
-    driver.find_element(by=By.CSS_SELECTOR, value='.OouJcb').send_keys(chkMonthFirst)
+            # this_month_first = datetime(before_one_year.year, before_one_year.month, 1)
+            # chkMonthFirst = this_month_first.strftime('%m/%d/%Y')
+            # driver.find_element(by=By.CSS_SELECTOR, value='.OouJcb').send_keys(chkMonthFirst)
+            # next_month = datetime(before_one_year.year, before_one_year.month, 1) + relativedelta(months=1)
+            # this_month_last = next_month + relativedelta(seconds=-1)
+            # chkMonthLast = this_month_last.strftime('%m/%d/%Y')
+            
+            chkThreeyearAgo = before_one_year.strftime('%m/%d/%Y')
+            driver.find_element(by=By.CSS_SELECTOR, value='.OouJcb').send_keys(chkThreeyearAgo)
+            driver.find_element(by=By.CSS_SELECTOR, value='.rzG2be').send_keys(chkThreeyearAgo)
+            wait_float(0.8,1.5)
+            pg.press('enter')
     
+
+        getPagingList = searchElement('.NVbCr')
+        if len(getPagingList) < 2:
+            continue
+        getPgCount = random.randrange(0,len(getPagingList))
+        if getPgCount != nowpage:
+            nowpage = getPgCount
+            getPagingList[getPgCount].click()
+        
+        getBlogLink = searchElement('.yuRUbf')
+        getBlogLinkCount = random.randrange(0,len(getBlogLink))
+        
+        getInfoPostLink = getBlogLink[getBlogLinkCount].find_element(by=By.CSS_SELECTOR, value='a').get_attribute('href')
+        if '//m.' not in getInfoPostLink:
+            getInfoPostLink = getInfoPostLink.replace('//', '//m.')
+        
+        
+        page = requests.get(getInfoPostLink)
+        soup = bs(page.text, "html.parser")
+        elements = soup.select('.se-module.se-module-text')
+
+        allStr = []
+        for ele in elements:
+            p = re.compile('[\uAC00-\uD7A30-9a-zA-Z\s]+')
+            chkResult = p.findall(str(ele))
+            allStr = allStr + chkResult
+
+        p_str = re.compile(r'[a-zA-Z0-9,|\n]+')
+        p_space = re.compile('\s\s')
+
+        for i in range(1, len(allStr)):
+            for j, strin in enumerate(allStr):
+                getStr = p_str.search(strin)
+                if getStr is not None:
+                    allStr.pop(j)
+                    break
+                getSpace = p_space.search(strin)
+                if getSpace is not None:
+                    allStr.pop(j)
+                    break
+                if strin == " ":
+                    allStr.pop(j)
+                    break
+        allStr = "".join(allStr)
+        if len(allStr) < 400:
+            continue
+        if len(allStr) > 700:
+            sliceRanNum = random.randrange(600, 700)
+            allStr = allStr[0:sliceRanNum]
+        break
+
+    resetStrArr = allStr.split(' ')
+
+    resetListArr = list_chunk(resetStrArr, 12)
+    for resetList in resetListArr:
+        setRan = random.randrange(2, 5)
+        resetOn = random.sample(range(1, 13), setRan)
+
+        if resetList == "":
+            continue
+
+        for inon in resetOn:
+            changeRanCount = random.randrange(0, len(subjectArr))
+            chkChangeRan = random.randrange(1, 6)
+            if chkChangeRan == 1:
+                try:
+                    resetList[inon - 1] = subjectArr[changeRanCount]
+                except:
+                    pass
+            else:
+                try:
+                    resetList[inon - 1] = ''
+                except:
+                    pass
+
+    imgLineCountBasic = divmod(len(resetListArr), 2)
+    imgLineCount = random.randrange(
+        int(imgLineCountBasic[0]) - 4, int(imgLineCountBasic[0]) + 4)
+
+    allContent = ''
+    for i, setList in enumerate(resetListArr):
+        if imgLineCount == i:
+            allContent = allContent + 'img_line|randomimg\n'
+        for setStr in setList:
+            if setStr == '':
+                continue
+            elif len(setStr) > 20:
+                continue
+            allContent = allContent + setStr
+            allContent = allContent + ' '
+        allContent = allContent + '\n'
+        
+    pg.alert(allContent)
+
+    driver.close()
+    return allContent
+        
+        
+        
+        
     
-    next_month = datetime(today.year, today.month, 1) + relativedelta(months=1)
-    this_month_last = next_month + relativedelta(seconds=-1)
-    chkMonthLast = this_month_last.strftime('%m/%d/%Y')
-    driver.find_element(by=By.CSS_SELECTOR, value='.rzG2be').send_keys(chkMonthLast)
-    wait_float(0.8,1.5)
-    pg.press('enter')
-    
-    getPagingList = searchElement('.NVbCr')
-    getPgCount = random.randrange(2,len(getPagingList) - 1)
-    getPagingList[getPgCount].click()
+        
     
     pg.alert('대기~~~')
     

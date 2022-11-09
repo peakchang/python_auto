@@ -82,7 +82,6 @@ def goScript(getDict):
     driver.get('https://www.naver.com')
     
     # chrome://version
-    # pg.alert('대기~')
     
     
     loginBtn = searchElement('.sc_login')
@@ -244,6 +243,7 @@ def goScript(getDict):
 
 
 def allowListVisit():
+    
     navItem = searchElement('.nav_item')
     for mitem in navItem:
         if mitem.text == '블로그':
@@ -255,6 +255,13 @@ def allowListVisit():
     
     driver.switch_to.window(driver.window_handles[1])
     driver.switch_to.frame('mainFrame')
+    
+    wait_float(1.5,2.5)
+    try:
+        closePopupBtn = driver.find_element(by=By.CSS_SELECTOR, value=".popup_da_btn_area ._btn_close")
+        closePopupBtn.click()
+    except:
+        pass
     
     getUrl = searchElement('._transPosition')
     getUrl[0].click()
@@ -269,7 +276,7 @@ def allowListVisit():
     
     wait_float(1.5,2.5)
     
-    driver.switch_to.frame('sympathyFrm222900264536')
+    driver.switch_to.frame(f'sympathyFrm{nowBlogLinkSplit[-1]}')
     visitList = searchElement('.wrap_blog2_sympathy .nick')
     
     for visitCount in range(len(visitList)):
@@ -278,7 +285,7 @@ def allowListVisit():
         wait_float(0.3,0.9)
         driver.switch_to.frame('mainFrame')
         wait_float(0.3,0.9)
-        driver.switch_to.frame('sympathyFrm222900264536')
+        driver.switch_to.frame(f'sympathyFrm{nowBlogLinkSplit[-1]}')
         wait_float(0.3,0.9)
         visitList = searchElement('.wrap_blog2_sympathy .nick')
         print(visitList[visitCount].text)
@@ -289,7 +296,19 @@ def allowListVisit():
         wait_float(0.7,1.2)
         driver.switch_to.default_content()
         driver.switch_to.frame('mainFrame')
+        
+        blogMenuChk = searchElement('#blog-menu .menu1 li a')
+        if(len(blogMenuChk) > 1):
+            blogMenuChk[1].click()
+        
+        
+        
+        
+        
         postListOpenBtn = searchElement('#toplistSpanBlind')
+        
+        
+        # 여기서 블로그 말고 프롤로그면 블로그 클릭하게 하기
         
         while True:
             print(postListOpenBtn[0].text)
@@ -311,15 +330,17 @@ def allowListVisit():
         getPostLink.click()
         wait_float(1.3,2.5)
         
-        
-        gongamBtn = driver.find_element(by=By.CSS_SELECTOR, value='.u_likeit_list_btn')
-        getGonggamStatus = gongamBtn.get_attribute('aria-pressed')
-        print(getGonggamStatus)
-        if getGonggamStatus == 'false':
-            gongamBtn = searchElement('.u_ico')
-            wait_float(0.3,0.9)
-            gongamBtn[-1].click()
-        else:
+        try:
+            gongamBtn = driver.find_element(by=By.CSS_SELECTOR, value='.u_likeit_list_btn')
+            getGonggamStatus = gongamBtn.get_attribute('aria-pressed')
+            print(getGonggamStatus)
+            if getGonggamStatus == 'false':
+                gongamBtn = searchElement('.u_ico')
+                wait_float(0.3,0.9)
+                gongamBtn[-1].click()
+            else:
+                pass
+        except:
             pass
 
         
@@ -402,6 +423,72 @@ def allowListVisit():
 #     exitApp()
 
 
+def blogRankChk(getDict):
+    
+
+    getInfoPostLink = getDict['getText']
+    
+    exLineNum = getDict['nlist']
+    wb = load_workbook('./etc/nid.xlsx')
+    ex = wb.active
+    searchId = ex.cell(exLineNum, 1).value
+    
+    global driver
+
+    
+    if getInfoPostLink == "":
+        pg.alert('검색어를 입력하세요!')
+        return
+        
+    
+    options = Options()
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, chrome_options=options)
+    driver.get('https://www.naver.com')
+    
+    serchBar = searchElement('#query')
+    serchBar[0].send_keys(getInfoPostLink)
+    wait_float(0.3,0.8)
+    pg.press('enter')
+    wait_float(0.3,0.8)
+    
+    lnbMenu = searchElement('.lnb_menu .menu')
+    
+    for menu in lnbMenu:
+        if 'VIEW' in menu.text:
+            menu.click()
+            break
+        
+    blogChk = searchElement('.type_sort a')
+    blogChk[1].click()
+    
+    listCount = 0
+    while True:
+        
+        if listCount % 20 == 0:
+            pg.press('end')
+        
+        allList = searchElement('.lst_total li')
+        listCount += 1
+        
+        try:
+            getHref = allList[listCount].find_element(by=By.CSS_SELECTOR, value='.thumb_single')
+            print(getHref.get_attribute('href'))
+            
+        except:
+            continue
+        
+        if searchId in getHref.get_attribute('href'):
+            pg.alert(f'현재 {listCount}번째 있습니다~')
+            exitApp()
+        
+    
+     
+    
+    
+    
+    
+    
 
 
 
@@ -467,7 +554,6 @@ def blogReplyReady(getValList):
     btnLogin = searchElement('.btn_login')
     btnLogin[0].click()
     
-    pg.alert('대기요~~~~~')
     # 블로그 링크따기
     
     while True:
@@ -488,6 +574,14 @@ def blogReplyReady(getValList):
     
     driver.switch_to.window(driver.window_handles[1])
     driver.switch_to.frame('mainFrame')
+    
+    
+    wait_float(1.5,2.5)
+    try:
+        closePopupBtn = driver.find_element(by=By.CSS_SELECTOR, value=".popup_da_btn_area ._btn_close")
+        closePopupBtn.click()
+    except:
+        pass
     
     getUrl = searchElement('._transPosition')
     getUrl[0].click()
@@ -530,6 +624,7 @@ def blogReplyWork():
         driver.switch_to.window(driver.window_handles[0])
         
     cafeWriteBtn = searchElement('.cafe-write-btn')
+    
     if "가입" in cafeWriteBtn[0].text:
         pg.alert('카페 가입하기~~')
     
@@ -580,9 +675,6 @@ def blogReplyWork():
     wait_float(1.5,2.5)
     driver.switch_to.frame('cafe_main')
     
-    buttonUrl = searchElement('.button_url')
-    buttonUrl[0].click()
-    
     wait_float(0.5,0.9)
     driver.close()
     
@@ -598,11 +690,14 @@ def blogReplyWork():
     
     
     
+    print(workCafeLink)
     
     forVal = random.randrange(6,8)
     
     ici = 0
     while True:
+        
+        
         ici += 1
         driver.switch_to.default_content()
         
@@ -663,7 +758,7 @@ def blogReplyWork():
                             gongamBtn = searchElement('.u_ico')
                             wait_float(0.3,0.9)
                             gongamBtn[-1].click()
-                            wait_float(0.3,0.9)
+                            wait_float(2.2,2.9)
                             driver.close()
                             wait_float(0.3,0.9)
                             driver.switch_to.window(driver.window_handles[0])
@@ -678,7 +773,7 @@ def blogReplyWork():
                             wait_float(0.3,0.9)
                             gongamBtn = searchElement('.u_ico')
                             gongamBtn[1].click()
-                            wait_float(0.5,1.5)
+                            wait_float(2.2,2.9)
                             driver.switch_to.default_content()
                             wait_float(0.3,0.9)
                             driver.close()
@@ -715,33 +810,9 @@ def blogReplyWork():
     pg.alert('작업이 완료 되었습니다.')
     pg.alert('끝내시겠습니까?')
     exitApp()
-    
- 
-    
-    
-    # user_mycafe_info
-    
-    # cafe-write-btn
-    
-    # menuLink226
-    
-    # cafe_main 프레임
-    
-    # #writeFormBtn
-    
-    # _noticeArticle
-    
-    # article-board tr
-    
-    # td_name
-    
-    # board-list
-    
-    
-    # se-fs-
-    
-    
-    # CommentWriter 
+
+
+
 
 
 
@@ -752,15 +823,16 @@ def blogReplyWork():
 
 # 상품 들어가서 스크롤 내리고 나오기
 
-def makeBlogContent():
+def makeBlogContent(getInfoPostLink):
     
-    getInfoPostLink = 'https://m.blog.naver.com/smk0107/222007822636'
+    if '//m.' not in getInfoPostLink:
+        getInfoPostLink = getInfoPostLink.replace('//', '//m.')
+    
+    print(type(getInfoPostLink))
 
     page = requests.get(getInfoPostLink)
     soup = bs(page.text, "html.parser")
     elements = soup.select('.se-module.se-module-text')
-    
-    pg.alert(elements)
     
     
     allStr = []

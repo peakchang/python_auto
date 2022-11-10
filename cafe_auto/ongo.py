@@ -56,12 +56,6 @@ cafe_id.cell(세로(열), 가로(행)).value
 
 def goScript(getDict):
     
-    testval = '가나다'
-    testarr = ['가나다','나나나','다다다']
-    if testval in testarr:
-        pg.alert('포함')
-    else:
-        pg.alert('안포함~~~~~')
     global driver
 
     cafe_optimize_file = load_workbook('./etc/naver_optimiz.xlsx')
@@ -91,27 +85,20 @@ def goScript(getDict):
     boardListNum = cafeAllInfo[3].split(',')
 
     while True:
-
+        
+        
+        # 시작
         allCount += 1
-        if allCount != 1:
-            with open('./etc/testchk/testwrite.txt', 'a') as f:
-                endTime = time.time()
-                f.write(
-                    f'{allCount - 1}번째 {nowAction} 작업 걸린 시간은? {endTime - startTime}\n')
-                f.write(f'{additional_time}\n')
-        startTime = time.time()
-
-        additional_time = ''
         
         # 아이피 변경
-        # service = Service(ChromeDriverManager().install())
-        # driver = webdriver.Chrome(service=service)
-        # while True:
-        #     getIP = changeIpSpeed()
-        #     print(getIP)
-        #     if not preIp == getIP:
-        #         preIp = getIP
-        #         break
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service)
+        while True:
+            getIP = changeIpSpeed()
+            print(getIP)
+            if not preIp == getIP:
+                preIp = getIP
+                break
 
         # 5로 나누어서 나머지가 1이면 (5의 배수 + 1 값이면 글쓰기 진행)
         print('아이피 변경 완료')
@@ -126,12 +113,9 @@ def goScript(getDict):
 
         print(f'일단 현재 작업은? {nowAction}')
         # 최적화 아이디인지 일반 아이디인지 체크
-
-        # chkOptimize1 = cafe_optimize.cell(1,2).value
-        # chkOptimize2 = cafe_optimize.cell(1,4).value
-        # if chkOptimize1 is None or chkOptimize2 is not None:
-        #     endOptimize = 'on'
-
+        
+        
+        # 첫번째 란이 비어있거나 / 4번째란이 채워져 있으면 최적화 작업 끝
         if endOptimize == '' and nowAction == 'write':
             if os.path.exists(f'./etc/content/id_{writeCount}'):
                 optimizeChkVal1 = cafe_optimize.cell(writeCount, 2).value
@@ -200,7 +184,9 @@ def goScript(getDict):
         print(f'{getVal}번째 있는 아이디로 {nowWriteStatus} {nowAction}작업, 크롬 정보 : {uaSet} / 아이디 : {nId} / 비번 : {nPwd} / 게시판 이름 {nBoardName}')
 
         print('정보 얻기 완료')
-
+        
+        
+        # 일반 아이디 글쓰기 작업
         if nowAction == 'write' and nowWriteStatus == 'basic':
 
             blog_start = time.time()
@@ -244,11 +230,6 @@ def goScript(getDict):
                 f.write('\n')
                 f.write(blog_content)
             # 블로그 글따기 끝!!
-
-            blog_end = time.time()
-
-            blogTime = blog_end - blog_start
-            additional_time = f'블로그 글따는 시간: ({blogTime})\n'
             
             # 모바일 버전 일반 글쓰기 시작~~~~
             nLoginTimeStart = time.time()
@@ -265,180 +246,191 @@ def goScript(getDict):
             driver = webdriver.Chrome(chrome_options=options, service=service)
 
             driver.get('https://www.naver.com')
-
+            
+            
             errchk = naverLogin(nId, nPwd)
             if errchk is not None:
-                if nowWriteStatus == 'basic':
-                    cafe_id.cell(getRanWorkVal, 4).value = errchk
-                    cafe_id_file.save('./etc/naver_id.xlsx')
-                elif nowWriteStatus == 'optimize':
-                    cafe_optimize.cell(writeCount, 4).value = errchk
-                    cafe_optimize_file.save('./etc/naver_optimiz.xlsx')
+                cafe_id.cell(getRanWorkVal, 4).value = errchk
+                cafe_id_file.save('./etc/naver_id.xlsx')
                 allCount = allCount - 1
                 driver.close()
                 continue
-
-            nLoginTimeEnd = time.time()
-
-            nLoginTime = nLoginTimeEnd - nLoginTimeStart
-            additional_time = additional_time + f' 로그인 시간 : ({nLoginTime})\n'
-
-            cafeWriteTimeStart = time.time()
-
-            driver.get(cafeName)
-
-            print('카페 진입 완료')
-
-            writeBtn = searchElement('.inner_box .btn_write')
-            untilEleGone(writeBtn[0], '.inner_box .btn_write')
-
-            # 메뉴 선택하기
-            selectBox = searchElement('.selectbox')
-            untilEleShow(selectBox[0], '.layer_dimmed')
-            selBoard = searchElement('.select_board li')
-            for board in selBoard:
-                if board.text == nBoardName:
-                    board.click()
-                    break
-
-            print('메뉴 선택 완료')
-
-            # 메뉴 선택 완료! 글쓰기 시작~~~~
-            if nowWriteStatus == 'basic':
-                with open("./etc/content/write_content.txt", "r") as f:
-                    getContents = f.readlines()
-            elif nowWriteStatus == 'optimize':
-                with open(f'./etc/content/id_{writeCount}/content.txt', 'r') as f:
-                    getContents = f.readlines()
-
-            chkImg = [0, 0, 0, 0, 0, 0]
-
-            # 글 작성 전 창 체크
-            focus_window('글쓰기')
-
-            articleWriteFormSubject = searchElement('.ArticleWriteFormSubject')
-            articleWriteFormSubject[0].click()
-            keyboard.write(text=getContents[0], delay=0.3)
-
-            oneEditor = searchElement('#one-editor')
-            oneEditor[0].click()
-            for i, line in enumerate(getContents):
-                if i == 0:
-                    continue
-                try:
-                    line_temp = line.replace('\n', '')
-                    chkImg = line_temp.split('|')
-                except:
-                    pass
-
-                if chkImg[0] == 'img_line':
-                    imageUpload = searchElement('.se-toolbar-item-image')
-                    imageUpload[0].click()
-
-                    nowPath = os.getcwd()
-                    if nowWriteStatus == 'basic':
-                        imagePath = nowPath + "\etc\content\images"
-                        imageList = os.listdir(imagePath)
-
-                        while True:
-                            getImage = imageList[random.randrange(
-                                0, len(imageList))]
-                            getImage_ex = getImage.split('.')[-1]
-                            if getImage_ex in chk_extesion:
-                                break
-                        wait_float(1.5, 2.2)
-                        pyperclip.copy(imagePath)
-                        wait_float(0.5, 0.9)
-                        pg.hotkey('ctrl', 'v')
-                        wait_float(0.5, 0.9)
-                        pg.press('enter')
-
-                        wait_float(0.9, 1.6)
-                        pyperclip.copy(getImage)
-                        wait_float(0.5, 0.9)
-                        pg.hotkey('ctrl', 'v')
-                        wait_float(0.5, 0.9)
-                        pg.press('enter')
-
-                        wait_float(3.5, 4.8)
-
-                    elif nowWriteStatus == 'optimize':
-                        imagePath = nowPath + f"\etc\content\id_{writeCount}"
-                        wait_float(1.5, 2.2)
-                        pyperclip.copy(imagePath)
-                        wait_float(0.5, 0.9)
-                        pg.hotkey('ctrl', 'v')
-                        wait_float(0.5, 0.9)
-                        pg.press('enter')
-
-                        wait_float(0.9, 1.6)
-                        pyperclip.copy(chkImg[1])
-                        wait_float(0.5, 0.9)
-                        pg.hotkey('ctrl', 'v')
-                        wait_float(0.5, 0.9)
-                        pg.press('enter')
-
-                        wait_float(3.5, 4.8)
-                    # 끝난다음 초기화
-                    chkImg = [0, 0, 0, 0, 0, 0]
-                elif line == 'enter':
-                    pg.press('enter')
-                else:
-                    keyboard.write(text=line, delay=0.05)
-                wait_float(0.7, 1.3)
-            successBtn = searchElement('.GnbBntRight__green')
-            untilEleGone(successBtn[0], '.GnbBntRight__green')
-
-            print('글쓰기 완료')
-
-            getLinkMore = searchElement('.btn_aside .more')
-            getLinkMore[0].click()
-
-            getLink = searchElement('.layer_list li')
-            getLink[3].click()
-
-            getLinkData = cb.paste()
             
-            with open('./etc/work_link.txt', 'a') as f:
-                f.write('\n')
-                f.write(getLinkData)
-
-            with open('./etc/work_link.txt', 'r') as f:
-                chkLines = f.readlines()
-
-            if len(chkLines) > 6:
-                getDelOptimizeReplyNum_temp = chkLines[0].split('/')
-                getDelOptimizeReplyNum = getDelOptimizeReplyNum_temp[-1]
-                if os.path.exists(f'./etc/content/temp_reply/{getDelOptimizeReplyNum}.txt'):
-                    os.remove(
-                        f'./etc/content/temp_reply/{getDelOptimizeReplyNum}.txt')
-                del chkLines[0]
-
-            with open('./etc/work_link.txt', 'w') as f:
-                f.writelines(''.join(chkLines))
-
-            cafeWriteTimeEnd = time.time()
-            cafeWriteTime = cafeWriteTimeEnd - cafeWriteTimeStart
-
-            additional_time = additional_time + \
-                f' 글 작성 시간 : ({cafeWriteTime})\n'
+            # 모바일 카페 글쓰기
+            mobileCafeWrite(cafeName,nBoardName,chk_extesion)
             
-
+            goToHome = searchElement('.header h1')
+            untilEleGone(goToHome[0], '.post_title')
+            mobileReplyAction()
+            
+        
+        
+        # 최적화 아이디 글쓰기 작업
         if nowAction == 'write' and nowWriteStatus == 'optimize':
             
-            if nowWriteStatus == 'optimize':
-                with open(f'./etc/content/id_{writeCount}/reply.txt', 'r') as f:
-                    getTempReplys = f.readlines()
-                    getTempReplys.insert(0, '0\n')
-                    getTempReplysName_temp = getLinkData.split('/')
-                    getTempReplysName = getTempReplysName_temp[-1]
-                with open(f'./etc/content/temp_reply/{getTempReplysName}.txt', 'w') as f:
-                    f.writelines(''.join(getTempReplys))
+            print(f'{getVal}번째 있는 아이디로 {nowWriteStatus} {nowAction}작업, 크롬 정보 : {uaSet} / 아이디 : {nId} / 비번 : {nPwd} / 게시판 이름 {nBoardName}')
+            
+            pg.alert(getVal)
+            pg.alert(nowWriteStatus)
+            pg.alert(nowAction)
+            pg.alert(uaSet)
+            pg.alert(nId)
+            pg.alert(nPwd)
+            
+            pg.alert(cafeAllInfo)
+            
+            
+            
+            
+            
+            
+            options = Options()
+            user_data = 'C:\\Users\\pcy\\AppData\\Local\\Google\\Chrome\\User Data\\default'
+            service = Service(ChromeDriverManager().install())
+            options.add_argument(f"user-data-dir={user_data}")
+            options.add_argument(f'--profile-directory={uaSet}')
+            driver = webdriver.Chrome(service=service, chrome_options=options)
+            
+            driver.get('https://www.naver.com')
+            
+            pg.alert('대기!!!!')
+            
+            # 네이버 로그인~~~~~~
+            
+            
+            loginBtn = searchElement('.sc_login')
+            loginBtn[0].click()
+            
+            searchElement('#id')
+            focus_window('chrome')
+            wait_float(0.3,0.9)
+            while True:
+            
+                pg.click(400,500)
+                inputId = driver.find_element(by=By.CSS_SELECTOR, value="#id")
+                inputId.click()
+                wait_float(0.3,0.9)
+                cb.copy(nId)
+                wait_float(0.3,0.9)
+                pg.hotkey('ctrl', 'a')
+                wait_float(0.3,0.9)
+                pg.hotkey('ctrl', 'v')
+                inputId = driver.find_element(by=By.CSS_SELECTOR, value="#id")
+                if inputId.get_attribute('value') != "":
+                    break
+            
+            while True:
+                inputPw = driver.find_element(by=By.CSS_SELECTOR, value="#pw")
+                inputPw.click()
+                wait_float(0.3,0.9)
+                cb.copy(nPwd)
+                wait_float(0.3,0.9)
+                pg.hotkey('ctrl', 'a')
+                wait_float(0.3,0.9)
+                pg.hotkey('ctrl', 'v')
+                inputPw = driver.find_element(by=By.CSS_SELECTOR, value="#pw")
+                if inputPw.get_attribute('value') != "":
+                    break
+            
+            btnLogin = searchElement('.btn_login')
+            btnLogin[0].click()
+            
+            
+            while True:
+                try:
+                    WebDriverWait(driver, 6).until(EC.presence_of_element_located((By.CSS_SELECTOR, "#query")))
+                    break
+                except:
+                    driver.get('https://www.naver.com')
+            
+            navItem = searchElement('.nav_item')
+            for mitem in navItem:
+                if mitem.text == '카페':
+                    mitem.click()
+                    break
+            
+            cafeList = searchElement('.user_mycafe_info')
+            getInCafe = ""
+            for cafeOn in cafeList:
+                if cafeAllInfo[0] in cafeOn.text:
+                    cafeOn.click()
+                    getInCafe = "on"
+                    break
+            
+            if getInCafe == "":
+                driver.get(cafeAllInfo[1])
+            else:
+                driver.switch_to.window(driver.window_handles[0])
+                driver.close()
+                driver.switch_to.window(driver.window_handles[0])
+            
+            searchElement('.cafe-write-btn')
+            
+            workBoardLink = searchElement(f'#menuLink{nBoardNum}')
+            workBoardLink[0].click()
+            
+            
+            driver.switch_to.frame('cafe_main')
+            
+            # 카페에 글 작성하기
+            
+            workBoardWriteBtn = searchElement('#writeFormBtn')
+            workBoardWriteBtn[0].click()
+            
+            wait_float(1.5,2.5)
+            driver.switch_to.window(driver.window_handles[1])
+            
+            with open(f'./etc/content/id_{writeCount}/content.txt', 'r') as f:
+                getContents = f.readlines()
+            
+            pg.alert(getContents)
+            pg.alert('대기~~~~~~~~~~~~~~~~~~~!!!!!!!!!!!!')
+            
+            subjectArea = searchElement('.FlexableTextArea')
+            subjectArea[0].click()
+            
+            pg.alert('대기!!')
+            
+            imgBtn = searchElement('.se-document-toolbar li')
+            imgBtn[0].click()
+            
+            pg.alert('대기!!!')
+            
+            
+            driver.switch_to.default_content()
+            
+            pg.alert('대기~~~~~~~~~~~~~~~~~~~!!!!!!!!!!!!')
+            pg.alert('대기~~~~~~~~~~~~~~~~~~~!!!!!!!!!!!!')
+            pg.alert('대기~~~~~~~~~~~~~~~~~~~!!!!!!!!!!!!')
+            pg.alert('대기~~~~~~~~~~~~~~~~~~~!!!!!!!!!!!!')
+            
+            
+            
+            
+            
+            
+            
+            # 네이버 로그인 끝~~~~~~
+        
+        
+            
+            
+            
+            
+            # if nowWriteStatus == 'optimize':
+            #     with open(f'./etc/content/id_{writeCount}/reply.txt', 'r') as f:
+            #         getTempReplys = f.readlines()
+            #         getTempReplys.insert(0, '0\n')
+            #         getTempReplysName_temp = getLinkData.split('/')
+            #         getTempReplysName = getTempReplysName_temp[-1]
+            #     with open(f'./etc/content/temp_reply/{getTempReplysName}.txt', 'w') as f:
+            #         f.writelines(''.join(getTempReplys))
             pass
 
             
 
         # ★★★★★★★★ 댓글 작성 시작!!
+        # 댓글달기 로그인
         if nowAction == 'reply':
             with open(f'./etc/useragent/useragent_all.txt') as f:
                 ua_data = f.readlines()[uaSet]
@@ -465,136 +457,14 @@ def goScript(getDict):
                 continue
 
             driver.get(cafeName)
-
-            nLoginTimeEnd = time.time()
-            nLoginTime = nLoginTimeEnd - nLoginTimeStart
-
-            additional_time = additional_time + f' 로그인 시간 : ({nLoginTime})\n'
-
-        else:
-            goToHome = searchElement('.header h1')
-            untilEleGone(goToHome[0], '.post_title')
+            mobileReplyAction()
             
         # 카페 메인 진입 끝! 게시글 클릭 시작!
+        
+        
         nowWriteStatus = ''
-        with open(f'./etc/work_link.txt') as f:
-            workLinkList = f.readlines()
-
-        for i, workLink in enumerate(workLinkList):
-
-            replyTimeStart = time.time()
-
-            workLink_temp = workLink.replace('\n', '')
-            workLinkOn = workLink_temp.split('/')[-1]
-            boardListAll = searchElement('.list_area li')
-            for boardList in boardListAll:
-                chkBoardLink = boardList.find_element(
-                    by=By.CSS_SELECTOR, value='.txt_area').get_attribute('href')
-                chkVal = workLinkOn in chkBoardLink
-
-                if chkVal:
-                    untilEleGone(boardList, '.txt_area')
-                    pg.moveTo(300, 500)
-                    randomFor = random.randrange(2, 5)
-                    for i in range(1, randomFor):
-                        wait_float(1.5, 2.5)
-                        pg.scroll(-500)
-                    break
-
-            # 게시글 클릭 완료 댓글 쓰기 시작!
-
-            randomActionVal = random.randrange(1, 4)
-            print(randomActionVal)
-            if randomActionVal == 1:
-                
-                # 댓글 작성 전 창 체크
-                replyGoBtn = searchElement('.f_reply')
-                untilEleShow(replyGoBtn[0], '.HeaderIcon')
-
-                wait_float(0.5, 0.9)
-                replyBtn = searchElement('.comment_textarea')
-                replyBtn[0].click()
-
-                getReply = ""
-                print(workLinkOn)
-                if os.path.exists(f'./etc/content/temp_reply/{workLinkOn}.txt'):
-
-                    with open(f'./etc/content/temp_reply/{workLinkOn}.txt', 'r') as f:
-                        getTempReplys = f.readlines()
-                        getTempNum = getTempReplys[0].replace('\n', '')
-                        try:
-                            getReply = getTempReplys[int(getTempNum) + 1]
-                            getTempReplys[0] = str(int(getTempNum) + 1) + '\n'
-                        except:
-                            getReply = ""
-                    wait_float(0.2, 0.7)
-                    if getReply != "":
-                        with open(f'./etc/content/temp_reply/{workLinkOn}.txt', 'w') as f:
-                            f.writelines(''.join(getTempReplys))
-                wait_float(0.2, 0.7)
-                if getReply == "":
-                    with open(f'./etc/all_reply.txt', 'r') as f:
-                        getTempReplysAll = f.readlines()
-                        getTempRanNum = random.randrange(
-                            0, len(getTempReplysAll))
-                        getReply = getTempReplysAll[getTempRanNum]
-
-                focus_window('카페')
-                keyboard.write(text=getReply, delay=0.1)
-                replySuccessBtn = searchElement('.btn_done')
-                untilEleGone(replySuccessBtn[0], '.btn_done')
-
-                goToPostiongBtn = searchElement('.HeaderGnbLeft')
-                untilEleGone(goToPostiongBtn[0], '.HeaderGnbLeft')
-
-            goToHome = searchElement('.header h1')
-            untilEleGone(goToHome[0], '.post_title')
-
-            replyTimeEnd = time.time()
-            replyTime = replyTimeEnd - replyTimeStart
-            additional_time = additional_time + \
-                f' {i}번째 댓글 시간 : ({replyTime})\n'
-
         driver.close()
-
-
-def mobile_chrome():
-    preIp = ''
-    while True:
-        getIP = changeIp()
-        if not preIp == getIP:
-            preIp = getIP
-            break
-    with open(f'./etc/useragent/useragent_all.txt') as f:
-        ua_data = f.readlines()
-        randomUaCount = random.randrange(0, len(ua_data))
-        getUaData = ua_data[randomUaCount]
-
-    options = Options()
-    user_agent = getUaData
-    options.add_argument('user-agent=' + user_agent)
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(chrome_options=options, service=service)
-    driver.get('https://www.naver.com')
-
-    pg.alert('대기~')
-
-
-def chk_blog_content():
     
-    chkCount = 0
-    while True:
-        chkCount += 1
-        id_file = load_workbook('./etc/naver_id.xlsx')
-        id_ex = id_file.active
-        get_id = id_ex.cell(chkCount,2).value
-        if get_id is None:
-            pg.alert('그만~~~')
-            break
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service)
-        driver.get(f'https://blog.naver.com/{get_id}')
-        pg.alert('대기~~~~~')
 
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>함수 시작염
@@ -602,40 +472,6 @@ def chk_blog_content():
 # 상품 들어가서 스크롤 내리고 나오기
 
 
-# async def wait헤arr, ex, i, chk):
-#     target_click = int(ex.cell(i, 4).value)
-#     now_click = ex.cell(i, 5).value
-
-#     if now_click is None:
-#         ex.cell(i, 5).value = 0
-#         now_click = 0
-#     now_click = int(now_click)
-#     if chk == 'Y':
-#         if now_click < target_click:
-#             arr.append(i)
-#     else:
-#         if now_click >= target_click:
-#             arr.append(i)
-
-
-# async def playAsync_getArr(arr, ex, linkCount, chk):
-#     try:
-#         await asyncio.gather(*[waitPrint(arr, ex, i, chk) for i in range(1, linkCount + 1)])
-#     except:
-#         pass
-
-
-# 결과 값(workarr) 을 가지고 해당 인덱스의 엑셀에 1씩 더하기
-# async def linkExcelPlus(ex, val):
-#     setVal = ex.cell(val, 5).value
-#     ex.cell(val, 5).value = setVal + 1
-
-
-# async def playAsync_plusArr(arr, ex):
-#     try:
-#         await asyncio.gather(*[linkExcelPlus(ex, val) for val in arr])
-#     except:
-#         pass
 
 
 def naverLogin(load_id, load_pass):
@@ -786,44 +622,224 @@ def changeIp():
     return getIp
 
 
-def changeIpSpeed():
-    pg.alert(driver)
-    os.system('adb server start')
-    client = AdbClient(host="127.0.0.1", port=5037)
-    device = client.devices()  # 디바이스 1개
-    ondevice = device[0]
-    while True:
+def mobileCafeWrite(cafeName,nBoardName,chk_extesion):
+    driver.get(cafeName)
+    print('카페 진입 완료')
+
+    writeBtn = searchElement('.inner_box .btn_write')
+    untilEleGone(writeBtn[0], '.inner_box .btn_write')
+
+    # 메뉴 선택하기
+    selectBox = searchElement('.selectbox')
+    untilEleShow(selectBox[0], '.layer_dimmed')
+    selBoard = searchElement('.select_board li')
+    for board in selBoard:
+        if board.text == nBoardName:
+            board.click()
+            break
+
+    print('메뉴 선택 완료')
+
+    # 메뉴 선택 완료! 글쓰기 시작~~~~
+    with open("./etc/content/write_content.txt", "r") as f:
+            getContents = f.readlines()
+
+    chkImg = [0, 0, 0, 0, 0, 0]
+
+    # 글 작성 전 창 체크
+    focus_window('글쓰기')
+
+    articleWriteFormSubject = searchElement('.ArticleWriteFormSubject')
+    articleWriteFormSubject[0].click()
+    keyboard.write(text=getContents[0], delay=0.3)
+
+    oneEditor = searchElement('#one-editor')
+    oneEditor[0].click()
+    for i, line in enumerate(getContents):
+        if i == 0:
+            continue
+        
         try:
-
-            ondevice.shell("input keyevent KEYCODE_POWER")
-            ondevice.shell("svc data disable")
-            ondevice.shell("settings put global airplane_mode_on 1")
-            ondevice.shell(
-                "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true")
-
-            ondevice.shell("svc data enable")
-            ondevice.shell("settings put global airplane_mode_on 0")
-            ondevice.shell(
-                "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state false")
-            time.sleep(3)
-            while True:
-                try:
-                    wait_float(0.5, 0.9)
-                    getIp = requests.get("http://ip.jsontest.com").json()['ip']
-                    if getIp is not None:
-                        break
-                except:
-                    continue
+            line_temp = line.replace('\n', '')
+            chkImg = line_temp.split('|')
         except:
+            pass
+        
+        line = line.replace('\n', '')
+        
+        if chkImg[0] == 'img_line':
+            imageUpload = searchElement('.se-toolbar-item-image')
+            imageUpload[0].click()
+
+            nowPath = os.getcwd()
+            imagePath = nowPath + "\etc\content\images"
+            imageList = os.listdir(imagePath)
 
             while True:
-                try:
-                    wait_float(0.5, 0.9)
-                    getIp = requests.get("http://ip.jsontest.com").json()['ip']
-                    if getIp is not None:
-                        break
-                except:
-                    continue
+                getImage = imageList[random.randrange(0, len(imageList))]
+                getImage_ex = getImage.split('.')[-1]
+                if getImage_ex in chk_extesion:
+                    break
+            wait_float(1.5, 2.2)
+            pyperclip.copy(imagePath)
+            wait_float(0.5, 0.9)
+            pg.hotkey('ctrl', 'v')
+            wait_float(0.5, 0.9)
+            pg.press('enter')
+
+            wait_float(0.9, 1.6)
+            pyperclip.copy(getImage)
+            wait_float(0.5, 0.9)
+            pg.hotkey('ctrl', 'v')
+            wait_float(0.5, 0.9)
+            pg.press('enter')
+
+            wait_float(3.5, 4.8)
+            # 끝난다음 초기화
+            chkImg = [0, 0, 0, 0, 0, 0]
+        elif line == 'enter':
+            pg.press('enter')
+        else:
+            keyboard.write(text=line, delay=0.05)
+            keyboard.write(text='\n', delay=0.05)
+        wait_float(0.7, 1.3)
+        
+    successBtn = searchElement('.GnbBntRight__green')
+    untilEleGone(successBtn[0], '.GnbBntRight__green')
+
+    print('글쓰기 완료')
+
+    getLinkMore = searchElement('.btn_aside .more')
+    getLinkMore[0].click()
+
+    getLink = searchElement('.layer_list li')
+    getLink[3].click()
+
+    getLinkData = cb.paste()
+    
+    with open('./etc/work_link.txt', 'a') as f:
+        f.write('\n')
+        f.write(getLinkData)
+
+    with open('./etc/work_link.txt', 'r') as f:
+        chkLines = f.readlines()
+
+    if len(chkLines) > 6:
+        getDelOptimizeReplyNum_temp = chkLines[0].split('/')
+        getDelOptimizeReplyNum = getDelOptimizeReplyNum_temp[-1]
+        if os.path.exists(f'./etc/content/temp_reply/{getDelOptimizeReplyNum}.txt'):
+            os.remove(
+                f'./etc/content/temp_reply/{getDelOptimizeReplyNum}.txt')
+        del chkLines[0]
+
+    with open('./etc/work_link.txt', 'w') as f:
+        f.writelines(''.join(chkLines))
+
+
+
+
+def mobileReplyAction():
+    with open(f'./etc/work_link.txt') as f:
+            workLinkList = f.readlines()
+    
+    print('문제점22222')
+    for i, workLink in enumerate(workLinkList):
+        
+        workLink_temp = workLink.replace('\n', '')
+        workLinkOn = workLink_temp.split('/')[-1]
+        boardListAll = searchElement('.list_area li')
+
+        for boardList in boardListAll:
+            chkBoardLink = boardList.find_element(by=By.CSS_SELECTOR, value='.txt_area').get_attribute('href')
+            if workLinkOn in chkBoardLink:
+                untilEleGone(boardList, '.txt_area')
+                pg.moveTo(300, 500)
+                randomFor = random.randrange(2, 5)
+                for i in range(1, randomFor):
+                    wait_float(1.5, 2.5)
+                    pg.scroll(-500)
+                break
+
+        # 게시글 클릭 완료 댓글 쓰기 시작!
+
+        randomActionVal = random.randrange(1, 4)
+        print(randomActionVal)
+        if randomActionVal == 1:
+            
+            # 댓글 작성 전 창 체크
+            replyGoBtn = searchElement('.f_reply')
+            untilEleShow(replyGoBtn[0], '.HeaderIcon')
+
+            wait_float(0.5, 0.9)
+            replyBtn = searchElement('.comment_textarea')
+            replyBtn[0].click()
+
+            getReply = ""
+            if os.path.exists(f'./etc/content/temp_reply/{workLinkOn}.txt'):
+
+                with open(f'./etc/content/temp_reply/{workLinkOn}.txt', 'r') as f:
+                    getTempReplys = f.readlines()
+                    getTempNum = getTempReplys[0].replace('\n', '')
+                    try:
+                        getReply = getTempReplys[int(getTempNum) + 1]
+                        getTempReplys[0] = str(int(getTempNum) + 1) + '\n'
+                    except:
+                        getReply = ""
+                wait_float(0.2, 0.7)
+                if getReply != "":
+                    with open(f'./etc/content/temp_reply/{workLinkOn}.txt', 'w') as f:
+                        f.writelines(''.join(getTempReplys))
+            wait_float(0.2, 0.7)
+            if getReply == "":
+                with open(f'./etc/all_reply.txt', 'r') as f:
+                    getTempReplysAll = f.readlines()
+                    getTempRanNum = random.randrange(
+                        0, len(getTempReplysAll))
+                    getReply = getTempReplysAll[getTempRanNum]
+
+            focus_window('카페')
+            keyboard.write(text=getReply, delay=0.1)
+            replySuccessBtn = searchElement('.btn_done')
+            untilEleGone(replySuccessBtn[0], '.btn_done')
+
+            goToPostiongBtn = searchElement('.HeaderGnbLeft')
+            untilEleGone(goToPostiongBtn[0], '.HeaderGnbLeft')
+
+        goToHome = searchElement('.header h1')
+        untilEleGone(goToHome[0], '.post_title')
+
+
+def changeIpSpeed():
+    
+    while True:
+        os.system('adb server start')
+        client = AdbClient(host="127.0.0.1", port=5037)
+        device = client.devices()  # 디바이스 1개
+        
+        try:
+            ondevice = device[0]
+            while True:
+                ondevice.shell("input keyevent KEYCODE_POWER")
+                ondevice.shell("svc data disable")
+                ondevice.shell("settings put global airplane_mode_on 1")
+                ondevice.shell(
+                    "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true")
+
+                ondevice.shell("svc data enable")
+                ondevice.shell("settings put global airplane_mode_on 0")
+                ondevice.shell(
+                    "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state false")
+                time.sleep(3)
+        except:
+            pass
+        while True:
+            try:
+                wait_float(0.5, 0.9)
+                getIp = requests.get("http://ip.jsontest.com").json()['ip']
+                if getIp is not None:
+                    break
+            except:
+                continue
 
         driver.get('https://fast.com/ko/')
         searchElement('.speed-results-container')
@@ -837,29 +853,6 @@ def changeIpSpeed():
             break
 
     return getIp
-# def searchElement(ele):
-#     wait_float(0.3, 0.7)
-#     re_count = 0
-#     element = ""
-#     while True:
-#         re_count += 1
-#         if re_count % 5 == 0:
-#             print(ele)
-#             print("새로고침!!!!")
-#             driver.refresh()
-#             focus_window('chrome')
-#             pg.press('F5')
-
-#             wait_float(2.5, 3.7)
-#         try:
-#             driver.implicitly_wait(3)
-#             selected_element = driver.find_elements(by=By.CSS_SELECTOR, value=ele)
-#             if selected_element:
-#                 wait_float(2.5, 3.7)
-#                 return selected_element
-#             # element = WebDriverWait(driver, 6).until(EC.presence_of_element_located((By.CSS_SELECTOR, ele)))
-#         except:
-#             pass
 
 
 def searchElement(ele):
@@ -1238,13 +1231,7 @@ def getBlogContentChrome(subjectArr):
     driver.close()
     return allContent
         
-        
-        
-        
     
-        
-    
-    pg.alert('대기~~~')
     
     
     

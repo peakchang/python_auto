@@ -27,7 +27,7 @@ def th3():
 
 # 윈도우 창 생성 및 버튼 화면 조절
 root = Tk()
-root.title("블로그 자동화 테스트")
+root.title("블로그 자동화")
 root.geometry("300x460+500+300")
 root.resizable(False, FALSE)
 

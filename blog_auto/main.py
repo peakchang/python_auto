@@ -3,7 +3,7 @@ from ongo import *
 
 
 def th():
-    getDict = {'ipval': ipVal.get(),}
+    getDict = {'ipval': ipVal.get(), 'middleVal': middleVal.get()}
     getDict['nlist'] = idbox.current() + 1
     onth = threading.Thread(target=lambda: goScript(getDict))
     
@@ -28,7 +28,7 @@ def th3():
 # 윈도우 창 생성 및 버튼 화면 조절
 root = Tk()
 root.title("블로그 자동화 테스트")
-root.geometry("300x360+500+300")
+root.geometry("300x460+500+300")
 root.resizable(False, FALSE)
 
 frame0 = LabelFrame(root, text='아이피 변경', padx=60, pady=5)  # padx / pady 내부여백
@@ -42,11 +42,21 @@ ipChk1.pack()
 ipChk2.pack()
 
 
+frame4 = LabelFrame(root, text='중간체크', padx=60, pady=5)  # padx / pady 내부여백
+frame4.pack(padx=10, pady=5)  # padx / pady 외부여백
+
+middleVal = IntVar()
+middleChk1 = Radiobutton(frame4, text="체크 안하기", value=1, variable=middleVal)
+middleChk2 = Radiobutton(frame4, text="체크 하기", value=0, variable=middleVal)
+middleChk1.select()
+middleChk1.pack()
+middleChk2.pack()
+
 
 frame1 = LabelFrame(root, text='아이디 선택', padx=40, pady=20)  # padx / pady 내부여백
 frame1.pack(padx=10, pady=5)  # padx / pady 외부여백
 
-frame2 = LabelFrame(root, text='버튼', padx=60, pady=0)  # padx / pady 내부여백
+frame2 = LabelFrame(root, text='버튼', padx=60, pady=10)  # padx / pady 내부여백
 frame2.pack(padx=10, pady=5)  # padx / pady 외부여백
 
 frame3 = LabelFrame(root, text='아이피 변경', padx=60, pady=0)  # padx / pady 내부여백

@@ -135,12 +135,16 @@ def goScript(getDict):
             break
         except:
             driver.get('https://www.naver.com')
+            
     
-    chkVal = pg.confirm(text='댓글순방을 진행하겠습니까?', buttons=['go','stop'])
-    if chkVal == 'go':
-        allowListVisit()
+    if getDict['middleVal'] == 0:
+        chkVal = pg.confirm(text='댓글순방을 진행하겠습니까?', buttons=['go','stop'])
+        if chkVal == 'go':
+            allowListVisit()
+        else:
+            pass
     else:
-        pass
+        allowListVisit()
     
     navItem = searchElement('.nav_item')
     for mitem in navItem:
@@ -163,13 +167,16 @@ def goScript(getDict):
     # files = sorted(glob.glob('.\\etc\\content\\*.txt'), key=os.path.getctime)
 
     # writeCount += 1
-    pg.alert(f'글쓰기를 시작합니다!!')
+    
+    if getDict['middleVal'] == 0:
+        pg.alert(f'글쓰기를 시작합니다!!')
     # driver.to_switch()
     driver.switch_to.window(driver.window_handles[1])
     
     driver.switch_to.frame('mainFrame')
     
     writeArea = searchElement('.se-component-content')
+    wait_float(2.5,3.5)
     
     with open('./content/content.txt', 'r') as f:
         getLines = f.readlines()
@@ -217,13 +224,40 @@ def goScript(getDict):
             wait_float(0.5,0.9)
             pg.press('enter')
             wait_float(0.5,0.9)
-    pg.alert('글 작성 완료!! 글쓰기 완료 버튼 클릭 후 확인을 눌러주세요!')
+    
+    if getDict['middleVal'] == 0:
+        pg.alert('글 작성 완료!! 글쓰기 완료 버튼 클릭 후 확인을 눌러주세요!')
+    else:
+        publichBtn = searchElement('.publish_btn__Y5mLP')
+        publichBtn[0].click()
+        wait_float(1.5,2.5)
+        tagArea = searchElement('.tag_textarea__iAnXk')
+        tagArea[0].click()
+        with open('./content/tag_list.txt', 'r') as tagr:
+            tagList = tagr.readlines()
+        if tagList is not []:
+            for tag in tagList:
+                writeTag = tag.replace('\n', '')
+                keyboard.write(text=writeTag, delay=0.05)
+                wait_float(0.5,1.2)
+                pg.press('enter')
+        confirmBtn = searchElement('.confirm_btn__Dv9du')
+        confirmBtn[0].click()
+        wait_float(3.5,5.5)
+        
+        
+        
+        
     
     # se-help-panel-close-button
     # publish_btn__Y5mLP
         
-    
-    chkVal = pg.confirm(text='글쓰기가 완료 되었습니다!! 댓글을 진행 하시겠습니까?', buttons=['go','stop'])
+    if getDict['middleVal'] == 0:
+        chkVal = pg.confirm(text='글쓰기가 완료 되었습니다!! 댓글을 진행 하시겠습니까?', buttons=['go','stop'])
+    else:
+        chkVal = 'go'
+
+
     if chkVal == 'go':
         getUrl = searchElement('._transPosition')
         getUrl[0].click()
@@ -235,7 +269,6 @@ def goScript(getDict):
         
         goToNaverMain = searchElement('.link_naver')
         goToNaverMain[0].click()
-        pg.alert('일단 블로그 링크는 URL 복사 클릭 해주시고 네이버 메인에서 대기하세요!')
         blogReplyWork()
     else:
         exitApp()
@@ -338,6 +371,7 @@ def allowListVisit():
                 gongamBtn = searchElement('.u_ico')
                 wait_float(0.3,0.9)
                 gongamBtn[-1].click()
+                wait_float(3.2,4.5)
             else:
                 pass
         except:
@@ -647,7 +681,7 @@ def blogReplyWork():
     subjectArea = searchElement('.FlexableTextArea')
     subjectArea[0].click()
     
-    with open('./etc/social_cafe_content.txt', 'r') as r:
+    with open('./content/social_cafe_content.txt', 'r') as r:
         cafeContent = r.readlines()
     
     keyboard.write(text=cafeContent[0], delay=0.05)

@@ -180,7 +180,6 @@ def goScript(getDict):
         except:
             getVal = writeCount
 
-        # pg.alert(text=f'{getVal}번째 있는 아이디로 {nowWriteStatus} {nowAction}작업, 크롬 정보 : {uaSet} / 아이디 : {nId} / 비번 : {nPwd} / 게시판 이름 {nBoardName}')
         print(f'{getVal}번째 있는 아이디로 {nowWriteStatus} {nowAction}작업, 크롬 정보 : {uaSet} / 아이디 : {nId} / 비번 : {nPwd} / 게시판 이름 {nBoardName}')
 
         print('정보 얻기 완료')
@@ -222,6 +221,7 @@ def goScript(getDict):
             
             service = Service(ChromeDriverManager().install())
             driver = webdriver.Chrome(service=service)
+            print('블로그 글 따기 시작~~~~~~~~~~~~~~~~~~~~~~~~~!!!!!!')
             blog_content = getBlogContentChrome(subjecArr)
             print('블로그 글 따기 완료')
             subject = " ".join(subjecArr)
@@ -267,33 +267,17 @@ def goScript(getDict):
         
         # 최적화 아이디 글쓰기 작업
         if nowAction == 'write' and nowWriteStatus == 'optimize':
-            
-            print(f'{getVal}번째 있는 아이디로 {nowWriteStatus} {nowAction}작업, 크롬 정보 : {uaSet} / 아이디 : {nId} / 비번 : {nPwd} / 게시판 이름 {nBoardName}')
-            
-            pg.alert(getVal)
-            pg.alert(nowWriteStatus)
-            pg.alert(nowAction)
-            pg.alert(uaSet)
-            pg.alert(nId)
-            pg.alert(nPwd)
-            
-            pg.alert(cafeAllInfo)
-            
-            
-            
-            
-            
-            
             options = Options()
             user_data = 'C:\\Users\\pcy\\AppData\\Local\\Google\\Chrome\\User Data\\default'
             service = Service(ChromeDriverManager().install())
             options.add_argument(f"user-data-dir={user_data}")
             options.add_argument(f'--profile-directory={uaSet}')
             driver = webdriver.Chrome(service=service, chrome_options=options)
+            driver.set_window_size(1180, 910)
+            driver.set_window_position(0,0) 
+            
             
             driver.get('https://www.naver.com')
-            
-            pg.alert('대기!!!!')
             
             # 네이버 로그인~~~~~~
             
@@ -306,7 +290,7 @@ def goScript(getDict):
             wait_float(0.3,0.9)
             while True:
             
-                pg.click(400,500)
+                pg.click(50,400)
                 inputId = driver.find_element(by=By.CSS_SELECTOR, value="#id")
                 inputId.click()
                 wait_float(0.3,0.9)
@@ -383,51 +367,138 @@ def goScript(getDict):
             with open(f'./etc/content/id_{writeCount}/content.txt', 'r') as f:
                 getContents = f.readlines()
             
-            pg.alert(getContents)
-            pg.alert('대기~~~~~~~~~~~~~~~~~~~!!!!!!!!!!!!')
-            
             subjectArea = searchElement('.FlexableTextArea')
             subjectArea[0].click()
+            keyboard.write(text=getContents[0], delay=0.05)
+            wait_float(0.8,1.9)
             
-            pg.alert('대기!!')
+            textArea = searchElement('.se-content')
+            textArea[0].click()
+            for i, getline in enumerate(getContents):
+                if i == 0:
+                    continue
+                getline = getline.replace('\n', '')
+                getImgAction = getline.split('|')
+                if getline == 'enter':
+                    pg.press('enter')
+                    wait_float(0.5, 0.9)
+                elif getImgAction[0] == 'img_line':
+                    imgBtn = searchElement('.se-document-toolbar li')
+                    imgBtn[0].click()
+                    nowPath = os.getcwd()
+                    imagePath = nowPath + f"\etc\content\id_{writeCount}"
+                    wait_float(1.5, 2.2)
+                    pyperclip.copy(imagePath)
+                    wait_float(0.5, 0.9)
+                    pg.hotkey('ctrl', 'v')
+                    wait_float(0.5, 0.9)
+                    pg.press('enter')
+                    
+                    wait_float(0.9, 1.6)
+                    pyperclip.copy(getImgAction[1])
+                    wait_float(0.5, 0.9)
+                    pg.hotkey('ctrl', 'v')
+                    wait_float(0.5, 0.9)
+                    pg.press('enter')
+                    
+                    wait_float(3.5, 4.8)
+                else:
+                    keyboard.write(text=getline, delay=0.05)
+                    wait_float(0.5, 0.9)
+                    pg.press('enter')
+            BaseButton = searchElement('.BaseButton')
+            BaseButton[0].click()
             
-            imgBtn = searchElement('.se-document-toolbar li')
-            imgBtn[0].click()
+            wait_float(1.5,2.5)
+            driver.switch_to.frame('cafe_main')
             
-            pg.alert('대기!!!')
+            BaseButton = searchElement('.button_url')
+            BaseButton[0].click()
+            wait_float(0.5,0.9)
+            getLinkData = cb.paste()
+            wait_float(0.5,0.9)
             
-            
-            driver.switch_to.default_content()
-            
-            pg.alert('대기~~~~~~~~~~~~~~~~~~~!!!!!!!!!!!!')
-            pg.alert('대기~~~~~~~~~~~~~~~~~~~!!!!!!!!!!!!')
-            pg.alert('대기~~~~~~~~~~~~~~~~~~~!!!!!!!!!!!!')
-            pg.alert('대기~~~~~~~~~~~~~~~~~~~!!!!!!!!!!!!')
-            
-            
-            
-            
-            
-            
-            
-            # 네이버 로그인 끝~~~~~~
-        
-        
+            with open(f'./etc/content/id_{writeCount}/reply.txt', 'r') as f:
+                getTempReplys = f.readlines()
+                getTempReplys.insert(0, '0\n')
+                getTempReplysName_temp = getLinkData.split('/')
+                getTempReplysName = getTempReplysName_temp[-1]
+            with open(f'./etc/content/temp_reply/{getTempReplysName}.txt', 'w') as f:
+                f.writelines(''.join(getTempReplys))
             
             
+            with open('./etc/work_link.txt', 'a') as f:
+                f.write('\n')
+                f.write(getLinkData)
+                
+            wait_float(0.5,0.9)
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
+            driver.switch_to.frame('cafe_main')
             
-            
-            # if nowWriteStatus == 'optimize':
-            #     with open(f'./etc/content/id_{writeCount}/reply.txt', 'r') as f:
-            #         getTempReplys = f.readlines()
-            #         getTempReplys.insert(0, '0\n')
-            #         getTempReplysName_temp = getLinkData.split('/')
-            #         getTempReplysName = getTempReplysName_temp[-1]
-            #     with open(f'./etc/content/temp_reply/{getTempReplysName}.txt', 'w') as f:
-            #         f.writelines(''.join(getTempReplys))
-            pass
-
-            
+            # 글쓰기 및 worklink에 링크 추가 완료 PC버전 댓글 달기 GO!
+            with open(f'./etc/work_link.txt') as f:
+                workLinkList = f.readlines()
+                
+            for i, workLink in enumerate(workLinkList):
+                workLink_temp = workLink.replace('\n', '')
+                workLinkOn = workLink_temp.split('/')[-1]
+                
+                driver.switch_to.default_content()
+                wait_float(0.3,0.9)
+                workBoardLink = searchElement('#menuLink0')
+                workBoardLink[0].click()
+                
+                driver.switch_to.frame('cafe_main')
+                articleDiff = searchElement('.article-board')
+                articleList = articleDiff[1].find_elements(by=By.CSS_SELECTOR, value=".td_article")
+                
+                for article in articleList:
+                    
+                    getArticleHref = article.find_element(by=By.CSS_SELECTOR, value=".article").get_attribute('href')
+                    print(getArticleHref)
+                    if workLinkOn in getArticleHref:
+                        article.click()
+                        pg.moveTo(100, 500)
+                        randomFor = random.randrange(2, 5)
+                        for i in range(1, randomFor):
+                            wait_float(1.5, 2.5)
+                            pg.scroll(-500)
+                        
+                        randomActionVal = random.randrange(1, 4)
+                        if randomActionVal == 1:
+                            getReply = ""
+                            if os.path.exists(f'./etc/content/temp_reply/{workLinkOn}.txt'):
+                                with open(f'./etc/content/temp_reply/{workLinkOn}.txt', 'r') as f:
+                                    getTempReplys = f.readlines()
+                                    getTempNum = getTempReplys[0].replace('\n', '')
+                                    try:
+                                        getReply = getTempReplys[int(getTempNum) + 1]
+                                        getTempReplys[0] = str(int(getTempNum) + 1) + '\n'
+                                    except:
+                                        getReply = ""
+                                wait_float(0.2, 0.7)
+                                if getReply != "":
+                                    with open(f'./etc/content/temp_reply/{workLinkOn}.txt', 'w') as f:
+                                        f.writelines(''.join(getTempReplys))
+                            wait_float(0.2, 0.7)
+                            if getReply == "":
+                                with open(f'./etc/all_reply.txt', 'r') as f:
+                                    getTempReplysAll = f.readlines()
+                                    getTempRanNum = random.randrange(
+                                        0, len(getTempReplysAll))
+                                    getReply = getTempReplysAll[getTempRanNum]
+                            
+                            replyArea = searchElement('.comment_inbox_text')
+                            replyArea[0].click()
+                            keyboard.write(text=getReply, delay=0.03)
+                            wait_float(1.5,2.5)
+                            replySuccessBtn = searchElement('.btn_register')
+                            driver.execute_script("arguments[0].scrollIntoView();", replySuccessBtn[0])
+                            replySuccessBtn[0].click()
+                            wait_float(2.5,3.5)
+                            
+                        break
 
         # ★★★★★★★★ 댓글 작성 시작!!
         # 댓글달기 로그인
@@ -818,18 +889,17 @@ def changeIpSpeed():
         
         try:
             ondevice = device[0]
-            while True:
-                ondevice.shell("input keyevent KEYCODE_POWER")
-                ondevice.shell("svc data disable")
-                ondevice.shell("settings put global airplane_mode_on 1")
-                ondevice.shell(
-                    "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true")
+            ondevice.shell("input keyevent KEYCODE_POWER")
+            ondevice.shell("svc data disable")
+            ondevice.shell("settings put global airplane_mode_on 1")
+            ondevice.shell(
+                "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true")
 
-                ondevice.shell("svc data enable")
-                ondevice.shell("settings put global airplane_mode_on 0")
-                ondevice.shell(
-                    "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state false")
-                time.sleep(3)
+            ondevice.shell("svc data enable")
+            ondevice.shell("settings put global airplane_mode_on 0")
+            ondevice.shell(
+                "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state false")
+            time.sleep(3)
         except:
             pass
         while True:
@@ -1053,13 +1123,14 @@ def getBlogContentChrome(subjectArr):
         wait_float(0.5,0.8)
         searchBar[-1].click()
         wait_float(0.5,0.8)
-        searchBar[-1].clear()
+        pg.hotkey('ctrl', 'a')
         wait_float(0.5,0.8)
-        searchBar[-1].send_keys(f'site:blog.naver.com {getKeyword}')
+        keyboard.write(text=f'site:blog.naver.com {getKeyword}', delay=0.5)
         pg.press('enter')
         wait_float(0.8,1.5)
         pg.press('enter')
         
+        print('검색 완료~~~~~~~~~~~~~~~~~~~!!!!!!')
         nowpage = 0
         if searchCount == 1:
             getTools = searchElement('.t2vtad')
@@ -1095,6 +1166,7 @@ def getBlogContentChrome(subjectArr):
             driver.find_element(by=By.CSS_SELECTOR, value='.rzG2be').send_keys(chkThreeyearAgo)
             wait_float(0.8,1.5)
             pg.press('enter')
+        print('기간 설정 완료~~~~~~~~~~~~~~~~~~~!!!!!!')
             
         try:
             driver.find_element(by=By.CSS_SELECTOR, value='.NVbCr')
@@ -1107,6 +1179,7 @@ def getBlogContentChrome(subjectArr):
         if getPgCount != nowpage:
             nowpage = getPgCount
             getPagingList[getPgCount].click()
+            
         
         getBlogLink = searchElement('.yuRUbf')
         getBlogLinkCount = random.randrange(0,len(getBlogLink))
@@ -1114,72 +1187,76 @@ def getBlogContentChrome(subjectArr):
         getInfoPostLink = getBlogLink[getBlogLinkCount].find_element(by=By.CSS_SELECTOR, value='a').get_attribute('href')
         if '//m.' not in getInfoPostLink:
             getInfoPostLink = getInfoPostLink.replace('//', '//m.')
-
-
+            
+            
         page = requests.get(getInfoPostLink)
         soup = bs(page.text, "html.parser")
         elements = soup.select('.se-module.se-module-text')
-        
+        print(getInfoPostLink)
+        print('블로그 파싱 완료! 글 다듬기 시작~~~~~~~~~~~~~~~~~~~!!!!!!')
         # se-title-text 제목
         
-        getSubjectEle = soup.select('.se-title-text')
-        getSubject = str(getSubjectEle[0])
-        
-        getSubject = getSubject.split('-->')[-2].replace('','').split('<!--')[0]
-        getSubject = re.sub(r"[^\uAC00-\uD7A3\s]", "", getSubject)
-        getSubjectArr = getSubject.replace('  ', ' ').split(' ')
-
-        allStr = []
-        for ele in elements:
-            p = re.compile('[\uAC00-\uD7A30-9a-zA-Z\s]+')
-            chkResult = p.findall(str(ele))
-            allStr = allStr + chkResult
-
-        p_str = re.compile(r'[a-zA-Z0-9,|\n]+')
-        p_space = re.compile('\s\s')
-
-
-        for i in range(1, len(allStr)):
-            for j, strin in enumerate(allStr):
-                getStr = p_str.search(strin)
-                if getStr is not None:
-                    allStr.pop(j)
-                    break
-                getSpace = p_space.search(strin)
-                if getSpace is not None:
-                    allStr.pop(j)
-                    break
-                if strin == " ":
-                    allStr.pop(j)
-                    break
-        
-        getAllStr = []
-        for strOn in allStr:
-            addVal = ''
-            for tempsub in getSubjectArr:
-                if len(tempsub) < 2:
-                    continue
-                if tempsub in strOn:
-                    addVal = ''
-                    break
-                addVal = 'on'
+        try:
+            getSubjectEle = soup.select('.se-title-text')
+            getSubject = str(getSubjectEle[0])
             
-            if addVal == 'on':
-                getAllStr.append(strOn)
-        
-        
-        
-        
-        allStr = " ".join(getAllStr)
-        
-        if len(allStr) < 400:
+            getSubject = getSubject.split('-->')[-2].replace('','').split('<!--')[0]
+            getSubject = re.sub(r"[^\uAC00-\uD7A3\s]", "", getSubject)
+            getSubjectArr = getSubject.replace('  ', ' ').split(' ')
+
+            allStr = []
+            for ele in elements:
+                p = re.compile('[\uAC00-\uD7A30-9a-zA-Z\s]+')
+                chkResult = p.findall(str(ele))
+                allStr = allStr + chkResult
+
+            p_str = re.compile(r'[a-zA-Z0-9,|\n]+')
+            p_space = re.compile('\s\s')
+
+            for i in range(1, len(allStr)):
+                for j, strin in enumerate(allStr):
+                    getStr = p_str.search(strin)
+                    if getStr is not None:
+                        allStr.pop(j)
+                        break
+                    getSpace = p_space.search(strin)
+                    if getSpace is not None:
+                        allStr.pop(j)
+                        break
+                    if strin == " ":
+                        allStr.pop(j)
+                        break
+            
+            getAllStr = []
+            for strOn in allStr:
+                addVal = ''
+                for tempsub in getSubjectArr:
+                    if len(tempsub) < 2:
+                        continue
+                    if tempsub in strOn:
+                        addVal = ''
+                        break
+                    addVal = 'on'
+                
+                if addVal == 'on':
+                    getAllStr.append(strOn)
+            
+            
+            
+            
+            allStr = " ".join(getAllStr)
+            
+            if len(allStr) < 400:
+                continue
+            if len(allStr) > 600:
+                sliceRanNum = random.randrange(400, 600)
+                allStr = allStr[0:sliceRanNum]
+                
+            # 제목에 들어간 단어들 삭제하기
+            break
+        except:
             continue
-        if len(allStr) > 600:
-            sliceRanNum = random.randrange(400, 600)
-            allStr = allStr[0:sliceRanNum]
-            
-        # 제목에 들어간 단어들 삭제하기
-        break
+    print('잡다한거 (태그, 영어, 숫자 등) 빼기 완료 ~~~~~~~~~~~~~~~~~~~!!!!!!')
 
     resetStrArr = allStr.split(' ')
 
@@ -1187,7 +1264,7 @@ def getBlogContentChrome(subjectArr):
     for resetList in resetListArr:
         setRan = random.randrange(2, 5)
         resetOn = random.sample(range(1, 13), setRan)
-
+        
         if resetList == "":
             continue
 
@@ -1204,7 +1281,7 @@ def getBlogContentChrome(subjectArr):
                     resetList[inon - 1] = ''
                 except:
                     pass
-
+    print('마무리 첫번째 체크~~~~~~~~~~~~~~~~~~~!!!!!!')
     imgLineCountBasic = divmod(len(resetListArr), 2)
     imgLineCount = random.randrange(
         int(imgLineCountBasic[0]) - 4, int(imgLineCountBasic[0]) + 4)
@@ -1227,7 +1304,7 @@ def getBlogContentChrome(subjectArr):
             allContent = allContent + '\n'
         
     allContent = allContent + subjectArr[-1]
-
+    print('마무리 완료~~~~~~~~~~~~~~~~~~~!!!!!!')
     driver.close()
     return allContent
         

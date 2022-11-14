@@ -700,6 +700,7 @@ def blogReplyWork():
     pg.press('enter')
     pg.hotkey('ctrl', 'v')
     wait_float(1.5,2.5)
+    
     BaseButton = searchElement('.BaseButton')
     BaseButton[0].click()
     
@@ -818,8 +819,6 @@ def blogReplyWork():
                         driver.switch_to.frame('cafe_main')
                         replyArea = searchElement('.comment_inbox_text')
                         replyArea[0].click()
-                        replyArea[0].send_keys('^0^')
-                        pg.press('space')
                         
                         for i,conLine in enumerate(cafeContent):
                             if i == 0:

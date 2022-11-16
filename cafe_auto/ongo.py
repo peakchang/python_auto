@@ -56,7 +56,12 @@ cafe_id.cell(세로(열), 가로(행)).value
 
 def goScript(getDict):
     
+    # chromeVersionChkPath = 'C:\\Users\\pcy\\AppData\\Local\\Google\\Chrome\\User Data\\default'
+    chromeVersionChkPath = 'C:\\Users\\드림모어\\AppData\\Local\\Google\\Chrome\\User Data\\Default'
+    
     global driver
+    
+    
 
     cafe_optimize_file = load_workbook('./etc/naver_optimiz.xlsx')
     cafe_optimize = cafe_optimize_file.active
@@ -223,6 +228,12 @@ def goScript(getDict):
             driver = webdriver.Chrome(service=service)
             print('블로그 글 따기 시작~~~~~~~~~~~~~~~~~~~~~~~~~!!!!!!')
             blog_content = getBlogContentChrome(subjecArr)
+            
+            if blog_content == 'errRobot':
+                print('에러가 났어요!!! 처음으로 돌아가야해요!!')
+                allCount = allCount - 1
+                continue
+            
             print('블로그 글 따기 완료')
             subject = " ".join(subjecArr)
             with open("./etc/content/write_content.txt", "w") as f:
@@ -268,7 +279,7 @@ def goScript(getDict):
         # 최적화 아이디 글쓰기 작업
         if nowAction == 'write' and nowWriteStatus == 'optimize':
             options = Options()
-            user_data = 'C:\\Users\\pcy\\AppData\\Local\\Google\\Chrome\\User Data\\default'
+            user_data = chromeVersionChkPath
             service = Service(ChromeDriverManager().install())
             options.add_argument(f"user-data-dir={user_data}")
             options.add_argument(f'--profile-directory={uaSet}')
@@ -423,6 +434,7 @@ def goScript(getDict):
                 getTempReplys.insert(0, '0\n')
                 getTempReplysName_temp = getLinkData.split('/')
                 getTempReplysName = getTempReplysName_temp[-1]
+                
             with open(f'./etc/content/temp_reply/{getTempReplysName}.txt', 'w') as f:
                 f.writelines(''.join(getTempReplys))
             
@@ -430,6 +442,21 @@ def goScript(getDict):
             with open('./etc/work_link.txt', 'a') as f:
                 f.write('\n')
                 f.write(getLinkData)
+
+            with open('./etc/work_link.txt', 'r') as f:
+                chkLines = f.readlines()
+
+            if len(chkLines) > 6:
+                setLines = chkLines[-6:]
+                
+            linkContent = ''
+            for linkline in setLines:
+                linkContent = linkContent + linkline
+                
+            with open('./etc/work_link.txt', 'w') as w:
+                w.write(linkContent)
+                
+            # worklink 설정 끝~~~~~~~~~~~
                 
             wait_float(0.5,0.9)
             driver.close()
@@ -441,26 +468,34 @@ def goScript(getDict):
                 workLinkList = f.readlines()
                 
             for i, workLink in enumerate(workLinkList):
-                workLink_temp = workLink.replace('\n', '')
-                workLinkOn = workLink_temp.split('/')[-1]
-                
                 driver.switch_to.default_content()
                 wait_float(0.3,0.9)
                 workBoardLink = searchElement('#menuLink0')
                 workBoardLink[0].click()
                 
+                workLink_temp = workLink.replace('\n', '')
+                workLinkOn = workLink_temp.split('/')[-1]
+                
                 driver.switch_to.frame('cafe_main')
                 articleDiff = searchElement('.article-board')
                 articleList = articleDiff[1].find_elements(by=By.CSS_SELECTOR, value=".td_article")
-                
-                for article in articleList:
-                    
+                for uu, article in enumerate(articleList):
                     getArticleHref = article.find_element(by=By.CSS_SELECTOR, value=".article").get_attribute('href')
-                    print(getArticleHref)
-                    if workLinkOn in getArticleHref:
-                        article.click()
-                        pg.moveTo(100, 500)
-                        randomFor = random.randrange(2, 5)
+                    getArticleHref = getArticleHref.split('id=')[-1].split('&')[0]
+                    if workLinkOn == getArticleHref:
+                        
+                        while True:
+                            tempArticleWrap = searchElement('.article-board')
+                            articleVal = tempArticleWrap[1].find_elements(by=By.CSS_SELECTOR, value=".td_article .article")
+                            articleVal[uu].click()
+                            wait_float(1.5,2.2)
+                            try:
+                                driver.find_element(by=By.CSS_SELECTOR, value=".article_header")
+                                break
+                            except:
+                                continue
+                        pg.moveTo(200, 500)
+                        randomFor = random.randrange(3, 6)
                         for i in range(1, randomFor):
                             wait_float(1.5, 2.5)
                             pg.scroll(-500)
@@ -488,16 +523,20 @@ def goScript(getDict):
                                     getTempRanNum = random.randrange(
                                         0, len(getTempReplysAll))
                                     getReply = getTempReplysAll[getTempRanNum]
-                            
-                            replyArea = searchElement('.comment_inbox_text')
-                            replyArea[0].click()
-                            keyboard.write(text=getReply, delay=0.03)
-                            wait_float(1.5,2.5)
-                            replySuccessBtn = searchElement('.btn_register')
-                            driver.execute_script("arguments[0].scrollIntoView();", replySuccessBtn[0])
-                            replySuccessBtn[0].click()
-                            wait_float(2.5,3.5)
-                            
+                                    
+                            wait_float(1.5,2.8)
+                            try:
+                                replyArea = driver.find_element(by=By.CSS_SELECTOR, value=".comment_inbox_text")
+                                replyArea.click()
+                                keyboard.write(text=getReply, delay=0.03)
+                                wait_float(1.5,2.5)
+                                replySuccessBtn = searchElement('.btn_register')
+                                driver.execute_script("arguments[0].scrollIntoView();", replySuccessBtn[0])
+                                replySuccessBtn[0].click()
+                                wait_float(2.5,3.5)
+                                print(replyArea)
+                            except:
+                                pass
                         break
 
         # ★★★★★★★★ 댓글 작성 시작!!
@@ -796,15 +835,14 @@ def mobileCafeWrite(cafeName,nBoardName,chk_extesion):
         chkLines = f.readlines()
 
     if len(chkLines) > 6:
-        getDelOptimizeReplyNum_temp = chkLines[0].split('/')
-        getDelOptimizeReplyNum = getDelOptimizeReplyNum_temp[-1]
-        if os.path.exists(f'./etc/content/temp_reply/{getDelOptimizeReplyNum}.txt'):
-            os.remove(
-                f'./etc/content/temp_reply/{getDelOptimizeReplyNum}.txt')
-        del chkLines[0]
-
-    with open('./etc/work_link.txt', 'w') as f:
-        f.writelines(''.join(chkLines))
+        setLines = chkLines[-6:]
+        
+    linkContent = ''
+    for linkline in setLines:
+        linkContent = linkContent + linkline
+        
+    with open('./etc/work_link.txt', 'w') as w:
+        w.write(linkContent)
 
 
 
@@ -950,22 +988,11 @@ def searchElement(ele):
     return selected_element
 
 
-# def untilEleShow(clickEle, searchEle):
-#     while True:
-#         try:
-#             clickEle.click()
-#             time.sleep(1)
-#             try:
-#                 btnEle = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, searchEle)))
-#                 if btnEle is not None:
-#                     return
-#             except:
-#                 continue
-#         except:
-#             pass
 
 def untilEleShow(clickEle, searchEle):
     while True:
+        print('정체~~~~~~~')
+        print(clickEle.text)
         try:
             clickEle.click()
             time.sleep(1)
@@ -1180,8 +1207,12 @@ def getBlogContentChrome(subjectArr):
             nowpage = getPgCount
             getPagingList[getPgCount].click()
             
-        
-        getBlogLink = searchElement('.yuRUbf')
+        try:
+            getBlogLink = driver.find_elements(by=By.CSS_SELECTOR, value='.yuRUbf')
+        except:
+            print('문제 생긴거 맞나요?!?!?!')
+            return 'errRobot'
+
         getBlogLinkCount = random.randrange(0,len(getBlogLink))
         
         getInfoPostLink = getBlogLink[getBlogLinkCount].find_element(by=By.CSS_SELECTOR, value='a').get_attribute('href')

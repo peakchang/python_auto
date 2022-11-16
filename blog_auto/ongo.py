@@ -228,6 +228,14 @@ def goScript(getDict):
     if getDict['middleVal'] == 0:
         pg.alert('글 작성 완료!! 글쓰기 완료 버튼 클릭 후 확인을 눌러주세요!')
     else:
+        
+        try:
+            helpCloseBtn = driver.find_element(by=By.CSS_SELECTOR, value=".se-help-panel-close-button")
+            helpCloseBtn.click()
+        except:
+            pass
+            
+        
         publichBtn = searchElement('.publish_btn__Y5mLP')
         publichBtn[0].click()
         wait_float(1.5,2.5)

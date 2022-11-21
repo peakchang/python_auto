@@ -1146,12 +1146,13 @@ def getBlogContentChrome(subjectArr):
         keyCount = random.randrange(0, len(allKeyword))
         getKeyword = allKeyword[keyCount]
         getKeyword = getKeyword.replace('\n', '')
-        searchBar = searchElement('.gLFyf.gsfi')
+        searchBar = searchElement('.gLFyf')
         wait_float(0.5,0.8)
         searchBar[-1].click()
         wait_float(0.5,0.8)
         pg.hotkey('ctrl', 'a')
         wait_float(0.5,0.8)
+        getKeyword = '전망'
         keyboard.write(text=f'site:blog.naver.com {getKeyword}', delay=0.5)
         pg.press('enter')
         wait_float(0.8,1.5)
@@ -1189,8 +1190,11 @@ def getBlogContentChrome(subjectArr):
             # chkMonthLast = this_month_last.strftime('%m/%d/%Y')
             
             chkThreeyearAgo = before_one_year.strftime('%m/%d/%Y')
+            
+            chkThreeyearAgo = '11/18/2019'
             driver.find_element(by=By.CSS_SELECTOR, value='.OouJcb').send_keys(chkThreeyearAgo)
             driver.find_element(by=By.CSS_SELECTOR, value='.rzG2be').send_keys(chkThreeyearAgo)
+            
             wait_float(0.8,1.5)
             pg.press('enter')
         print('기간 설정 완료~~~~~~~~~~~~~~~~~~~!!!!!!')

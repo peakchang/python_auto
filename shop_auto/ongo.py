@@ -46,7 +46,7 @@ def goScript(getDict):
     
     if getDict['backVal'] == 1:
         backRanVal = random.randrange(0,2)
-        backRanVal = 1
+        backRanVal = 0
         if backRanVal == 1:
             with open('./etc/useragent/useragent_all.txt','r') as r:
                 uaAll = r.readlines()
@@ -191,7 +191,7 @@ def goScript(getDict):
         """
 
         workArr = []
-
+        tempWorkArr = []
         if linkCount <= 5:
             searchCount = linkCount
         elif linkCount >= 6 and linkCount < 10:
@@ -204,13 +204,20 @@ def goScript(getDict):
         if len(workArr) > searchCount:
             workArr = workArr[0:searchCount]
         else:
-            asyncio.run(playAsync_getArr(workArr, link_excel, linkCount, 'N'))
+            asyncio.run(playAsync_getArr(tempWorkArr, link_excel, linkCount, 'N'))
+            random.shuffle(tempWorkArr)
+            getCountLen = searchCount - len(workArr)
+            tempWorkArr = tempWorkArr[0:getCountLen]
+            workArr = workArr + tempWorkArr
+            # workArr = workArr[0:searchCount]
             random.shuffle(workArr)
-            workArr = workArr[0:searchCount]
+            
+            
+            
 
         asyncio.run(playAsync_plusArr(workArr, link_excel))
         jisho_wb.save('./etc/jisho_link.xlsx')
-
+        
         # 작업할 배열 구하기 끝~~~~~
 
         # 접속할 USER AGENT 설정

@@ -298,6 +298,13 @@ def allowListVisit():
     driver.switch_to.frame('mainFrame')
     
     wait_float(1.5,2.5)
+    
+    try:
+        closePopupBtn = driver.find_element(by=By.CSS_SELECTOR, value="#not_see")
+        closePopupBtn.click()
+    except:
+        pass
+    
     try:
         closePopupBtn = driver.find_element(by=By.CSS_SELECTOR, value=".popup_da_btn_area ._btn_close")
         closePopupBtn.click()
@@ -341,23 +348,34 @@ def allowListVisit():
         blogMenuChk = searchElement('#blog-menu .menu1 li a')
         if(len(blogMenuChk) > 1):
             blogMenuChk[1].click()
+            searchElement('#blog-menu')
         
         
         
-        
-        
-        postListOpenBtn = searchElement('#toplistSpanBlind')
+        try:
+            postListOpenBtn = driver.find_element(by=By.CSS_SELECTOR, value="#toplistSpanBlind")
+        except:
+            wait_float(0.5,1.5)
+            driver.close()
+            wait_float(0.3,0.9)
+            driver.switch_to.window(driver.window_handles[1])
+            wait_float(0.3,0.9)
+            continue
         
         
         # 여기서 블로그 말고 프롤로그면 블로그 클릭하게 하기
         
         while True:
-            print(postListOpenBtn[0].text)
-            if postListOpenBtn[0].text == '목록닫기':
+            print(postListOpenBtn.text)
+            if postListOpenBtn.text == '목록닫기':
                 break
             else:
                 wait_float(0.5,1.3)
-                postListOpenBtn[0].click()
+                try:
+                    postListOpenBtn.click()
+                except:
+                    wait_float(2.5,3.5)
+                    continue
         wait_float(1.5,2.5)
         postList = searchElement('.blog2_categorylist')
         
@@ -619,6 +637,13 @@ def blogReplyReady(getValList):
     
     
     wait_float(1.5,2.5)
+    
+    try:
+        closePopupBtn = driver.find_element(by=By.CSS_SELECTOR, value="#not_see")
+        closePopupBtn.click()
+    except:
+        pass
+    
     try:
         closePopupBtn = driver.find_element(by=By.CSS_SELECTOR, value=".popup_da_btn_area ._btn_close")
         closePopupBtn.click()

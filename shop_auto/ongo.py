@@ -44,74 +44,66 @@ def goScript(getDict):
     
     global driver
     
-    if getDict['backVal'] == 1:
-        backRanVal = random.randrange(0,2)
-        backRanVal = 0
-        if backRanVal == 1:
-            with open('./etc/useragent/useragent_all.txt','r') as r:
-                uaAll = r.readlines()
-            rVal = random.randrange(0,len(uaAll))
-            getUa = uaAll[rVal]
+    # if getDict['backVal'] == 1:
+    #     backRanVal = random.randrange(0,2)
+    #     backRanVal = 0
+    #     if backRanVal == 1:
+    #         with open('./etc/useragent/useragent_all.txt','r') as r:
+    #             uaAll = r.readlines()
+    #         rVal = random.randrange(0,len(uaAll))
+    #         getUa = uaAll[rVal]
             
-            options = Options()
-            options.add_argument('user-agent=' + getUa)
-            service = Service(ChromeDriverManager().install())
-            driver = webdriver.Chrome(chrome_options=options, service=service)
+    #         options = Options()
+    #         options.add_argument('user-agent=' + getUa)
+    #         service = Service(ChromeDriverManager().install())
+    #         driver = webdriver.Chrome(chrome_options=options, service=service)
             
             
             
-            driver.get('https://www.naver.com')
+    #         driver.get('https://www.naver.com')
             
-            backWb = load_workbook('./etc/backlinks.xlsx')
-            backEx = backWb.active
-            searchKeyword = backEx.cell(1,1).value
+    #         backWb = load_workbook('./etc/backlinks.xlsx')
+    #         backEx = backWb.active
+    #         searchKeyword = backEx.cell(1,1).value
             
-            while True:
-                wait_float(0.3,0.9)
-                try:
-                    searchBar = driver.find_element(by=By.CSS_SELECTOR, value='#MM_SEARCH_FAKE')
-                    break
-                except:
-                    pass
+    #         while True:
+    #             wait_float(0.3,0.9)
+    #             try:
+    #                 searchBar = driver.find_element(by=By.CSS_SELECTOR, value='#MM_SEARCH_FAKE')
+    #                 break
+    #             except:
+    #                 pass
                 
-                try:
-                    searchBar = driver.find_element(by=By.CSS_SELECTOR, value='#query')
-                    break
-                except:
-                    pass
+    #             try:
+    #                 searchBar = driver.find_element(by=By.CSS_SELECTOR, value='#query')
+    #                 break
+    #             except:
+    #                 pass
                 
-                try:
-                    searchBar = driver.find_element(by=By.CSS_SELECTOR, value='#nx_query')
-                    break
-                except:
-                    pass
-            searchBar.click()
-            wait_float(1.5,2.3)
-            keyboard.write(text=searchKeyword, delay=0.3)
-            wait_float(0.3,0.9)
-            pg.press('enter')
-            searchElement('.total_wrap')
-            clickEle = searchElement(backEx.cell(1,3).value)
-            clickEle[0].click()
+    #             try:
+    #                 searchBar = driver.find_element(by=By.CSS_SELECTOR, value='#nx_query')
+    #                 break
+    #             except:
+    #                 pass
+    #         searchBar.click()
+    #         wait_float(1.5,2.3)
+    #         keyboard.write(text=searchKeyword, delay=0.3)
+    #         wait_float(0.3,0.9)
+    #         pg.press('enter')
+    #         searchElement('.total_wrap')
+    #         clickEle = searchElement(backEx.cell(1,3).value)
+    #         clickEle[0].click()
             
-            wait_float(2.5, 4.5)
-            pg.moveTo(200, 200)
-            maxRange = random.randrange(3,6)
-            forCount = 0
-            while maxRange > forCount:
-                scrollVal = random.randrange(300, 500)
-                pg.scroll(-scrollVal)
-                wait_float(2.5, 4.5)
-                forCount += 1
-            driver.back()
-            
-            
-            
-            
-            
-            
-            
-            
+    #         wait_float(2.5, 4.5)
+    #         pg.moveTo(200, 200)
+    #         maxRange = random.randrange(3,6)
+    #         forCount = 0
+    #         while maxRange > forCount:
+    #             scrollVal = random.randrange(300, 500)
+    #             pg.scroll(-scrollVal)
+    #             wait_float(2.5, 4.5)
+    #             forCount += 1
+    #         driver.back()
     
     # 전체 반복 시작 전 preIp 값 초기화
     preIp = ""
@@ -315,6 +307,8 @@ def goScript(getDict):
 
                 if chkin_tong == "":
                     addKeyword = link_excel.cell(workVal, 1).value
+                    if addKeyword == "SK":
+                        addKeyword = "SKT"
                     searchRan = random.randrange(0, 2)
                     if searchRan == 0:
                         searchKeyword = searchKeyword + " " + addKeyword

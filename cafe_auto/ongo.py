@@ -1195,29 +1195,49 @@ def getBlogContentChrome(subjectArr):
             driver.find_element(by=By.CSS_SELECTOR, value='.OouJcb').send_keys(chkThreeyearAgo)
             driver.find_element(by=By.CSS_SELECTOR, value='.rzG2be').send_keys(chkThreeyearAgo)
             
-            wait_float(0.8,1.5)
+            wait_float(2.3,3.5)
             pg.press('enter')
         print('기간 설정 완료~~~~~~~~~~~~~~~~~~~!!!!!!')
-            
+        
+        try:
+            chkError = driver.find_element(by=By.CSS_SELECTOR, value='.jHxzxc')
+            pg.alert(chkError)
+            if chkError:
+                return 'errRobot'
+            searchBar = searchElement('.gLFyf')
+            wait_float(0.5,0.8)
+            searchBar[-1].click()
+            pg.press('enter')
+            wait_float(2.3,3.5)
+        except:
+            pass
+        
         try:
             driver.find_element(by=By.CSS_SELECTOR, value='.NVbCr')
         except:
             continue
-        getPagingList = searchElement('.NVbCr')
-        if len(getPagingList) < 2:
+        
+        try:
+            getPagingList = searchElement('.NVbCr')
+            if len(getPagingList) < 2:
+                continue
+            getPgCount = random.randrange(0,len(getPagingList))
+            if getPgCount != nowpage:
+                nowpage = getPgCount
+                getPagingList[getPgCount].click()
+        except:
             continue
-        getPgCount = random.randrange(0,len(getPagingList))
-        if getPgCount != nowpage:
-            nowpage = getPgCount
-            getPagingList[getPgCount].click()
             
         try:
             getBlogLink = driver.find_elements(by=By.CSS_SELECTOR, value='.yuRUbf')
         except:
             print('문제 생긴거 맞나요?!?!?!')
             return 'errRobot'
-
-        getBlogLinkCount = random.randrange(0,len(getBlogLink))
+        
+        try:
+            getBlogLinkCount = random.randrange(0,len(getBlogLink))
+        except:
+            continue
         
         getInfoPostLink = getBlogLink[getBlogLinkCount].find_element(by=By.CSS_SELECTOR, value='a').get_attribute('href')
         if '//m.' not in getInfoPostLink:

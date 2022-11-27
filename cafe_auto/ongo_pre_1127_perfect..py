@@ -379,64 +379,7 @@ def goScript(getDict):
                 driver.close()
                 driver.switch_to.window(driver.window_handles[0])
             
-            # searchElement('.cafe-write-btn')
-            
-            pg.alert('대기~~!!!!')
-            myActionBtn = searchElement('.tit-action-on')
-            myActionBtn[0].click()
-            wait_float(2.1,3.5)
-            
-            # myArticleBtn = driver.find_elements(by=By.CSS_SELECTOR, value=".member-action-data .info2 a")
-            myArticleBtn = searchElement('.member-action-data .info2 a')
-            myArticleBtn[1].click()
-            
-            wait_float(2.1,3.5)
-            
-            driver.switch_to.frame('cafe_main')
-            
-            articleListOne = searchElement('#app .article')
-            articleListOne[0].click()
-            
-            driver.switch_to.window(driver.window_handles[1])
-            wait_float(0.5,1.3)
-            
-            driver.switch_to.default_content()
-            driver.switch_to.frame('cafe_main')
-            commentItemList = searchElement('.CommentItem')
-            
-            myComCount = 0
-            for i in range(5):
-                commentItem = commentItemList[i]
-                try:
-                    myComment = commentItem.find_elements(by=By.CSS_SELECTOR, value=".CommentItem--mine")
-                    myComCount += 1
-                    if myComCount >= 2:
-                        stopReReply = "on"
-                        break
-                except:
-                    pass
-                
-            if stopReReply == "":
-                commentItemList = searchElement('.CommentItem')
-                for commentItem in commentItemList:
-                    try:
-                        myComment = commentItem.find_elements(by=By.CSS_SELECTOR, value=".CommentItem--mine")
-                        continue
-                    except:
-                        pass
-                    pg.alert('대기~~~~~~~~~~!!!!!!!')
-                
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
+            searchElement('.cafe-write-btn')
             
             workBoardLink = searchElement(f'#menuLink{nBoardNum}')
             workBoardLink[0].click()
@@ -907,7 +850,7 @@ def changeIp():
 def mobileCafeWrite(cafeName,nBoardName,chk_extesion):
     driver.get(cafeName)
     print('카페 진입 완료')
-    
+
     writeBtn = searchElement('.inner_box .btn_write')
     untilEleGone(writeBtn[0], '.inner_box .btn_write')
 

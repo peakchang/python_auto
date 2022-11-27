@@ -189,7 +189,7 @@ def goScript(getDict):
         elif linkCount >= 6 and linkCount < 10:
             searchCount = 6
         else:
-            searchCount = 9
+            searchCount = 8
         asyncio.run(playAsync_getArr(workArr, link_excel, linkCount, 'Y'))
         random.shuffle(workArr)
 

@@ -267,6 +267,17 @@ def goScript(getDict):
 
 
     if chkVal == 'go':
+        
+        
+        
+        while True:
+            try:
+                miniPopup = driver.find_element(by=By.CSS_SELECTOR, value="#floatingda_content button")
+                wait_float(0.5,1.2)
+                miniPopup[0].click()
+            except:
+                break
+            
         getUrl = searchElement('._transPosition')
         getUrl[0].click()
         wait_float(1.5,2.5)
@@ -719,9 +730,9 @@ def blogReplyWork():
     
     keyboard.write(text=cafeContent[0], delay=0.05)
     wait_float(0.3,0.9)
-    pg.moveTo(750,850)
-    wait_float(0.3,0.9)
-    pg.click()
+    
+    contentArea = searchElement('.se-content')
+    contentArea[0].click()
     wait_float(0.3,0.9)
     pg.hotkey('ctrl', 'a')
     

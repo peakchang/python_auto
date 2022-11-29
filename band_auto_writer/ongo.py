@@ -134,15 +134,13 @@ def goScript(getval):
                         untilEleGone('.btnViewerClose', '.btnViewerClose')
                 except:
                     pass
-
+                
                 try:
                     closeBtn = driver.find_elements(by=By.CSS_SELECTOR, value='._postDetailListKeepingRegion.-show')
                     if closeBtn:
                         untilEleGone('.aIconClose', '._postDetailListKeepingRegion.-show')
                 except:
                     pass
-                
-                
 
                 
                 print('전체 문제 없음~~~')
@@ -389,18 +387,33 @@ def untilEleShow(clickEle,searchEle):
 def untilEleGone(clickEle,searchEle):
     while True:
         print('돌고 있음 문제되는 부분은??' + clickEle)
+        closeBtn = driver.find_element(by=By.CSS_SELECTOR, value=clickEle)
         try:
-            btnEle = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, clickEle)))
-            btnEle.click()
-            time.sleep(1)
+            closeBtn = driver.find_element(by=By.CSS_SELECTOR, value=clickEle)
+            closeBtn.click()
+            wait_float(0.8,1.9)
         except:
             pass
         
+
         try:
-            btnEle = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, searchEle)))
-            if btnEle is None:
-                return
-            else:
-                continue
+            driver.find_element(by=By.CSS_SELECTOR, value=searchEle)
+            wait_float(0.5,0.9)
+            continue
         except:
             return
+        # try:
+        #     btnEle = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, clickEle)))
+        #     btnEle.click()
+        #     time.sleep(1)
+        # except:
+        #     pass
+        
+        # try:
+        #     btnEle = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, searchEle)))
+        #     if btnEle is None:
+        #         return
+        #     else:
+        #         continue
+        # except:
+        #     return

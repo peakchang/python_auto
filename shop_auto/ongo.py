@@ -281,9 +281,11 @@ def goScript(getDict):
 
         for workVal in workArr:
             
+            print('에러 예상 111111')
             searchKeyword = link_excel.cell(workVal, 2).value
             searchJisho(searchKeyword, driver)
-
+            
+            print('에러 예상 222222')
             nShopCategory = searchElement(".mainFilter_option__c4_Lq")
             
             try:
@@ -293,7 +295,7 @@ def goScript(getDict):
                 pass
             
             
-
+            print('에러 예상 333333')
             setTong = link_excel.cell(workVal, 1).value
             if setTong is not None:
                 chkin_tong = ""
@@ -315,6 +317,7 @@ def goScript(getDict):
                     else:
                         searchKeyword = addKeyword + " " + searchKeyword
                     searchJisho(searchKeyword, driver)
+            print('에러 예상 444444')
                     
             # 상위 4개 중 1개 클릭
             
@@ -341,7 +344,7 @@ def goScript(getDict):
                         zzimAction(chkCount, workVal, link_excel, jisho_wb)
                         
                     break
-            
+            print('에러 예상 555555')
             print('상위 작업 체크 끝~~~~!!')
                 
             # 상위에 있는거 찾는거 끝

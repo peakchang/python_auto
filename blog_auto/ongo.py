@@ -646,7 +646,6 @@ def blogReplyReady(getValList):
     driver.switch_to.window(driver.window_handles[1])
     driver.switch_to.frame('mainFrame')
     
-    
     wait_float(1.5,2.5)
     
     try:

@@ -132,303 +132,306 @@ def goScript(getDict):
 
     while True:
         
-        startTime = time.time()
-        # 1/3 확률로 네이버 아이디 비번 저장 (로그인 준비)
+        try:
+            startTime = time.time()
+            # 1/3 확률로 네이버 아이디 비번 저장 (로그인 준비)
 
-        if getDict['loginVal'] == 1:
-            chk_login = random.randrange(1, 8)
-        else:
-            chk_login = 1
-            load_id = ""
-        
-        if chk_login != 1:
-            while True:
-                wait_float(0.2, 0.5)
-                load_connect_info = id_excel.cell(allCount, 1).value
-                if load_connect_info is None:
-                    load_connect_info = getUaNum()
-                    link_excel.cell(allCount, 1).value = load_connect_info
-                    link_excel.save('./etc/naver_id.xlsx')
-                    
-                    
-                load_id = id_excel.cell(allCount, 2).value
-                load_pass = id_excel.cell(allCount, 3).value
-
-                if load_connect_info != '' and load_id != '' and load_pass != '':
-                    break
-
-        # 로그인 준비 끝
-
-        # 아이피 체크 (기존 아이피와 같으면 다시, 아니면 break)
-        if getDict['ipval'] == 1:
+            if getDict['loginVal'] == 1:
+                chk_login = random.randrange(1, 8)
+            else:
+                chk_login = 1
+                load_id = ""
             
-            service = Service(ChromeDriverManager().install())
-            driver = webdriver.Chrome(service=service)
-            while True:
-                getIP = changeIpSpeed()
-                print(getIP)
-                if not preIp == getIP:
-                    preIp = getIP
-                    break
-        
-        # 아이피 체크 끝
-
-        """
-        작업 할 지식쇼핑 링크 구하기
-        (총 링크가 5개 이하면 전부다, 6~10 개면 4개, 10개 이상이면 8개씩)
-        1. 전체 항목 목표 클릭수와 현재 클릭수 비교 (비동기 항목으로 보냄)
-        2. 현재 클릭수가 목표 클릭수보다 크거나 같으면 일단 탈락
-        3. 남은것들이 총 링크와 같으면 위 조건으로, 총 링크보다 작은데 미달이면 미달인 갯수만큼 아무거나 채우기, 총 링크보다 크면 그만큼 빼기
-        4. 그래서 해서 행 번호만 뽑아서 배열로 저장
-        """
-
-        workArr = []
-        tempWorkArr = []
-        if linkCount <= 5:
-            searchCount = linkCount
-        elif linkCount >= 6 and linkCount < 10:
-            searchCount = 6
-        else:
-            searchCount = 8
-        asyncio.run(playAsync_getArr(workArr, link_excel, linkCount, 'Y'))
-        random.shuffle(workArr)
-
-        if len(workArr) > searchCount:
-            workArr = workArr[0:searchCount]
-        else:
-            asyncio.run(playAsync_getArr(tempWorkArr, link_excel, linkCount, 'N'))
-            random.shuffle(tempWorkArr)
-            getCountLen = searchCount - len(workArr)
-            tempWorkArr = tempWorkArr[0:getCountLen]
-            workArr = workArr + tempWorkArr
-            # workArr = workArr[0:searchCount]
-            random.shuffle(workArr)
-            
-            
-            
-
-        asyncio.run(playAsync_plusArr(workArr, link_excel))
-        jisho_wb.save('./etc/jisho_link.xlsx')
-        
-        # 작업할 배열 구하기 끝~~~~~
-
-        # 접속할 USER AGENT 설정
-        if chk_login != 1:
-            # connect_info = load_connect_info.split(',')
-            # with open(f'./etc/useragent/useragent_{connect_info[0]}.txt') as f:
-            #     ua_data = f.readlines()[int(connect_info[1]) - 1]
-            with open(f'./etc/useragent/useragent_all.txt') as f:
-                ua_data = f.readlines()[load_connect_info]
-                ua_data = ua_data.replace('\n', '')
-                
-        else:
-            ua_data = linecache.getline(
-                './etc/useragent/useragent_all.txt', random.randrange(1, 14)).strip()
-        # 설정 끝~ 접속하기
-
-        options = Options()
-        user_agent = ua_data
-        options.add_argument('user-agent=' + user_agent)
-
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(chrome_options=options, service=service)
-
-        driver.get('https://www.naver.com')
-
-        time.sleep(2)
-        focus_window('NAVER')
-
-        # 네이버 로그인
-        if chk_login != 1:
-            errchk = naverLogin(load_id, load_pass)
-            if errchk is not None:
-                id_excel.cell(allCount, 4).value = errchk
-                idp_wb.save('./etc/naver_id.xlsx')
-                allCount += 1
-                continue
-            main_menus = searchElement(".shs_link")
-            for main_menu in main_menus:
-                if 'mail' in main_menu.get_attribute('href'):
-                    main_menu.click()
-                    break
-            wait_float(2.5, 3.5)
-            
-            while True:
-                wait_float(0.3, 0.5)
-                try:
-                    driver.find_element(by=By.CSS_SELECTOR, value='#MM_SEARCH_FAKE')
-                    break
-                except:
-                    driver.back()
-        mainSearch = searchElement("#MM_SEARCH_FAKE")
-        mainSearch[0].click()
-
-        subSearch = searchElement("#query")
-
-        focus_window('NAVER')
-
-        # subSearch[0].send_keys('네이버쇼핑')
-        subSearch[0].click()
-        keyboard.write(text="네이버쇼핑", delay=0.3)
-
-        searchSubmit = searchElement(".MM_SEARCH_SUBMIT")
-        searchSubmit[0].click()
-
-        nShoppingLink = searchElement(".link_name")
-
-        # nShoppingLink[0].click()
-        untilEleGone(nShoppingLink[0], ".link_name")
-
-        for workVal in workArr:
-            
-            print('에러 예상 111111')
-            searchKeyword = link_excel.cell(workVal, 2).value
-            searchJisho(searchKeyword, driver)
-            
-            print('에러 예상 222222')
-            nShopCategory = searchElement(".mainFilter_option__c4_Lq")
-            
-            try:
-                UseLessBtn = driver.find_element(by=By.CSS_SELECTOR, value='.basicFilter_btn_close__qftDk svg')
-                UseLessBtn.click()
-            except:
-                pass
-            
-            
-            print('에러 예상 333333')
-            setTong = link_excel.cell(workVal, 1).value
-            if setTong is not None:
-                chkin_tong = ""
-                for category in nShopCategory:
-                    category_name = category.text.replace('+', '')
-                    if category_name[0:2] == setTong:
-                        chkin_tong = "on"
-                        print('여기서 나는 에러가 맞는걸까요?????')
-                        # untilEleShow(category, ".selected_btn_del__0mIMB")
-                        untilEleShow(category, ".mainFilter_option__c4_Lq")
-
-                if chkin_tong == "":
-                    addKeyword = link_excel.cell(workVal, 1).value
-                    if addKeyword == "SK":
-                        addKeyword = "SKT"
-                    searchRan = random.randrange(0, 2)
-                    if searchRan == 0:
-                        searchKeyword = searchKeyword + " " + addKeyword
-                    else:
-                        searchKeyword = addKeyword + " " + searchKeyword
-                    searchJisho(searchKeyword, driver)
-            print('에러 예상 444444')
-                    
-            # 상위 4개 중 1개 클릭
-            
-            # 여기서 6개까지 찾고 / 그중에 있으면 그냥 한번만, 없으면 원래대로
-            
-            highWork = ""
-            item_list = driver.find_elements("xpath", "//*[contains(@class, 'product_list_item')]")
-            print('상위 작업 체크 시작!!')
-            chkCount = 0
-            for highCount in range(6):
-                chkCount += 1
-                getHighHref = item_list[highCount].find_element(by=By.CSS_SELECTOR, value='a').get_attribute('href')
-                searchMid = link_excel.cell(workVal, 3).value
-                if str(searchMid) in getHighHref:
-                    highWork = "on"
-                    driver.execute_script("arguments[0].scrollIntoView();", item_list[highCount])
-                    item_list[highCount].click()
-                    maxRange = random.randrange(7, 10)
-                    onProductScroll(maxRange)
-                    
-                    #찜하기~~~
-                    zzimRandomVal = random.randrange(1, 4)
-                    if chk_login != 1 and zzimRandomVal == 1:
-                        zzimAction(chkCount, workVal, link_excel, jisho_wb)
-                        
-                    break
-            print('에러 예상 555555')
-            print('상위 작업 체크 끝~~~~!!')
-                
-            # 상위에 있는거 찾는거 끝
-            if highWork == "":
-                item_list = driver.find_elements("xpath", "//*[contains(@class, 'product_list_item')]")
-                topProduct_val = random.randrange(0, 4)
-                wait_float(0.5, 1.7)
-                driver.execute_script("arguments[0].scrollIntoView();", item_list[topProduct_val])
-                untilEleGone(item_list[topProduct_val], ".product_list_item")
-
-                wait_float(2, 5)
-
-                maxRange = random.randrange(2, 4)
-                onProductScroll(maxRange)
-
-                truncBreak = ""
-                truncCount = 1
+            if chk_login != 1:
                 while True:
-                    truncCount += 1
-                    
-                    resetCount = 0
-                    while True:
-                        resetCount += 1
-                        if resetCount > 20:
-                            driver.refresh()
-                            wait_float(2, 4)
-                            resetCount = 0
+                    wait_float(0.2, 0.5)
+                    load_connect_info = id_excel.cell(allCount, 1).value
+                    if load_connect_info is None:
+                        load_connect_info = getUaNum()
+                        link_excel.cell(allCount, 1).value = load_connect_info
+                        link_excel.save('./etc/naver_id.xlsx')
                         
-                        item_list = driver.find_elements("xpath", "//*[contains(@class, 'product_list_item')]")
+                        
+                    load_id = id_excel.cell(allCount, 2).value
+                    load_pass = id_excel.cell(allCount, 3).value
 
-                        if len(item_list) < 35:
-                            pg.hotkey('end')
-                            wait_float(2, 4)
-                        else:
-                            break
-                        
-                    chkCount = 0
-                    for item in item_list:
-                        chkCount += 1
-                        getHref = item.find_element(by=By.CSS_SELECTOR, value='a').get_attribute('href')
-                        searchMid = link_excel.cell(workVal, 3).value
-                        wait_float(0.1, 0.3)
-                        if str(searchMid) in getHref:
-                            truncBreak = "on"
-                            # action.move_to_element(item).perform()
-                            driver.execute_script("arguments[0].scrollIntoView();", item)
-                            item.click()
-                            maxRange = random.randrange(4, 6)
-                            onProductScroll(maxRange)
-                            break
-                        
-                        
-                        
-                    #찜하기~~~
-                    zzimRandomVal = random.randrange(1, 4)
-                    if chk_login != 1 and zzimRandomVal == 1:
-                        zzimAction(chkCount, workVal, link_excel, jisho_wb)
-                        
-                        
-                                
-
-                    if truncBreak == "on":
+                    if load_connect_info != '' and load_id != '' and load_pass != '':
                         break
 
-                    pageBtn = driver.find_elements(by=By.CSS_SELECTOR, value='.paginator_list_paging__VxWMC > a')
-                    for btn in pageBtn:
-                        if int(btn.text) == truncCount:
-                            btn.click()
+            # 로그인 준비 끝
+
+            # 아이피 체크 (기존 아이피와 같으면 다시, 아니면 break)
+            if getDict['ipval'] == 1:
+                
+                service = Service(ChromeDriverManager().install())
+                driver = webdriver.Chrome(service=service)
+                while True:
+                    getIP = changeIpSpeed()
+                    print(getIP)
+                    if not preIp == getIP:
+                        preIp = getIP
+                        break
+            
+            # 아이피 체크 끝
+
+            """
+            작업 할 지식쇼핑 링크 구하기
+            (총 링크가 5개 이하면 전부다, 6~10 개면 4개, 10개 이상이면 8개씩)
+            1. 전체 항목 목표 클릭수와 현재 클릭수 비교 (비동기 항목으로 보냄)
+            2. 현재 클릭수가 목표 클릭수보다 크거나 같으면 일단 탈락
+            3. 남은것들이 총 링크와 같으면 위 조건으로, 총 링크보다 작은데 미달이면 미달인 갯수만큼 아무거나 채우기, 총 링크보다 크면 그만큼 빼기
+            4. 그래서 해서 행 번호만 뽑아서 배열로 저장
+            """
+
+            workArr = []
+            tempWorkArr = []
+            if linkCount <= 5:
+                searchCount = linkCount
+            elif linkCount >= 6 and linkCount < 10:
+                searchCount = 6
+            else:
+                searchCount = 8
+            asyncio.run(playAsync_getArr(workArr, link_excel, linkCount, 'Y'))
+            random.shuffle(workArr)
+
+            if len(workArr) > searchCount:
+                workArr = workArr[0:searchCount]
+            else:
+                asyncio.run(playAsync_getArr(tempWorkArr, link_excel, linkCount, 'N'))
+                random.shuffle(tempWorkArr)
+                getCountLen = searchCount - len(workArr)
+                tempWorkArr = tempWorkArr[0:getCountLen]
+                workArr = workArr + tempWorkArr
+                # workArr = workArr[0:searchCount]
+                random.shuffle(workArr)
+                
+                
+                
+
+            asyncio.run(playAsync_plusArr(workArr, link_excel))
+            jisho_wb.save('./etc/jisho_link.xlsx')
+            
+            # 작업할 배열 구하기 끝~~~~~
+
+            # 접속할 USER AGENT 설정
+            if chk_login != 1:
+                # connect_info = load_connect_info.split(',')
+                # with open(f'./etc/useragent/useragent_{connect_info[0]}.txt') as f:
+                #     ua_data = f.readlines()[int(connect_info[1]) - 1]
+                with open(f'./etc/useragent/useragent_all.txt') as f:
+                    ua_data = f.readlines()[load_connect_info]
+                    ua_data = ua_data.replace('\n', '')
+                    
+            else:
+                ua_data = linecache.getline(
+                    './etc/useragent/useragent_all.txt', random.randrange(1, 14)).strip()
+            # 설정 끝~ 접속하기
+
+            options = Options()
+            user_agent = ua_data
+            options.add_argument('user-agent=' + user_agent)
+
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(chrome_options=options, service=service)
+
+            driver.get('https://www.naver.com')
+
+            time.sleep(2)
+            focus_window('NAVER')
+
+            # 네이버 로그인
+            if chk_login != 1:
+                errchk = naverLogin(load_id, load_pass)
+                if errchk is not None:
+                    id_excel.cell(allCount, 4).value = errchk
+                    idp_wb.save('./etc/naver_id.xlsx')
+                    allCount += 1
+                    continue
+                main_menus = searchElement(".shs_link")
+                for main_menu in main_menus:
+                    if 'mail' in main_menu.get_attribute('href'):
+                        main_menu.click()
+                        break
+                wait_float(2.5, 3.5)
+                
+                while True:
+                    wait_float(0.3, 0.5)
+                    try:
+                        driver.find_element(by=By.CSS_SELECTOR, value='#MM_SEARCH_FAKE')
+                        break
+                    except:
+                        driver.back()
+            mainSearch = searchElement("#MM_SEARCH_FAKE")
+            mainSearch[0].click()
+
+            subSearch = searchElement("#query")
+
+            focus_window('NAVER')
+
+            # subSearch[0].send_keys('네이버쇼핑')
+            subSearch[0].click()
+            keyboard.write(text="네이버쇼핑", delay=0.3)
+
+            searchSubmit = searchElement(".MM_SEARCH_SUBMIT")
+            searchSubmit[0].click()
+
+            nShoppingLink = searchElement(".link_name")
+
+            # nShoppingLink[0].click()
+            untilEleGone(nShoppingLink[0], ".link_name")
+
+            for workVal in workArr:
+                
+                print('에러 예상 111111')
+                searchKeyword = link_excel.cell(workVal, 2).value
+                searchJisho(searchKeyword, driver)
+                
+                print('에러 예상 222222')
+                nShopCategory = searchElement(".mainFilter_option__c4_Lq")
+                
+                try:
+                    UseLessBtn = driver.find_element(by=By.CSS_SELECTOR, value='.basicFilter_btn_close__qftDk svg')
+                    UseLessBtn.click()
+                except:
+                    pass
+                
+                
+                print('에러 예상 333333')
+                setTong = link_excel.cell(workVal, 1).value
+                if setTong is not None:
+                    chkin_tong = ""
+                    for category in nShopCategory:
+                        category_name = category.text.replace('+', '')
+                        if category_name[0:2] == setTong:
+                            chkin_tong = "on"
+                            print('여기서 나는 에러가 맞는걸까요?????')
+                            # untilEleShow(category, ".selected_btn_del__0mIMB")
+                            untilEleShow(category, ".mainFilter_option__c4_Lq")
+
+                    if chkin_tong == "":
+                        addKeyword = link_excel.cell(workVal, 1).value
+                        if addKeyword == "SK":
+                            addKeyword = "SKT"
+                        searchRan = random.randrange(0, 2)
+                        if searchRan == 0:
+                            searchKeyword = searchKeyword + " " + addKeyword
+                        else:
+                            searchKeyword = addKeyword + " " + searchKeyword
+                        searchJisho(searchKeyword, driver)
+                print('에러 예상 444444')
+                        
+                # 상위 4개 중 1개 클릭
+                
+                # 여기서 6개까지 찾고 / 그중에 있으면 그냥 한번만, 없으면 원래대로
+                
+                highWork = ""
+                item_list = driver.find_elements("xpath", "//*[contains(@class, 'product_list_item')]")
+                print('상위 작업 체크 시작!!')
+                chkCount = 0
+                for highCount in range(6):
+                    chkCount += 1
+                    getHighHref = item_list[highCount].find_element(by=By.CSS_SELECTOR, value='a').get_attribute('href')
+                    searchMid = link_excel.cell(workVal, 3).value
+                    if str(searchMid) in getHighHref:
+                        highWork = "on"
+                        driver.execute_script("arguments[0].scrollIntoView();", item_list[highCount])
+                        item_list[highCount].click()
+                        maxRange = random.randrange(7, 10)
+                        onProductScroll(maxRange)
+                        
+                        #찜하기~~~
+                        zzimRandomVal = random.randrange(1, 4)
+                        if chk_login != 1 and zzimRandomVal == 1:
+                            zzimAction(chkCount, workVal, link_excel, jisho_wb)
+                            
+                        break
+                print('에러 예상 555555')
+                print('상위 작업 체크 끝~~~~!!')
+                    
+                # 상위에 있는거 찾는거 끝
+                if highWork == "":
+                    item_list = driver.find_elements("xpath", "//*[contains(@class, 'product_list_item')]")
+                    topProduct_val = random.randrange(0, 4)
+                    wait_float(0.5, 1.7)
+                    driver.execute_script("arguments[0].scrollIntoView();", item_list[topProduct_val])
+                    untilEleGone(item_list[topProduct_val], ".product_list_item")
+
+                    wait_float(2, 5)
+
+                    maxRange = random.randrange(2, 4)
+                    onProductScroll(maxRange)
+
+                    truncBreak = ""
+                    truncCount = 1
+                    while True:
+                        truncCount += 1
+                        
+                        resetCount = 0
+                        while True:
+                            resetCount += 1
+                            if resetCount > 20:
+                                driver.refresh()
+                                wait_float(2, 4)
+                                resetCount = 0
+                            
+                            item_list = driver.find_elements("xpath", "//*[contains(@class, 'product_list_item')]")
+
+                            if len(item_list) < 35:
+                                pg.hotkey('end')
+                                wait_float(2, 4)
+                            else:
+                                break
+                            
+                        chkCount = 0
+                        for item in item_list:
+                            chkCount += 1
+                            getHref = item.find_element(by=By.CSS_SELECTOR, value='a').get_attribute('href')
+                            searchMid = link_excel.cell(workVal, 3).value
+                            wait_float(0.1, 0.3)
+                            if str(searchMid) in getHref:
+                                truncBreak = "on"
+                                # action.move_to_element(item).perform()
+                                driver.execute_script("arguments[0].scrollIntoView();", item)
+                                item.click()
+                                maxRange = random.randrange(4, 6)
+                                onProductScroll(maxRange)
+                                break
+                            
+                            
+                            
+                        #찜하기~~~
+                        zzimRandomVal = random.randrange(1, 4)
+                        if chk_login != 1 and zzimRandomVal == 1:
+                            zzimAction(chkCount, workVal, link_excel, jisho_wb)
+                            
+                            
+                                    
+
+                        if truncBreak == "on":
                             break
 
-        # 끝내고 allCount 값 ++
-        driver.quit()
-        if chk_login != 1:
-            id_excel.cell(allCount, 4).value = "지식쇼핑 작업 완료"
-            idp_wb.save('./etc/naver_id.xlsx')
-            allCount += 1
+                        pageBtn = driver.find_elements(by=By.CSS_SELECTOR, value='.paginator_list_paging__VxWMC > a')
+                        for btn in pageBtn:
+                            if int(btn.text) == truncCount:
+                                btn.click()
+                                break
+
+            # 끝내고 allCount 값 ++
+            driver.quit()
+            if chk_login != 1:
+                id_excel.cell(allCount, 4).value = "지식쇼핑 작업 완료"
+                idp_wb.save('./etc/naver_id.xlsx')
+                allCount += 1
+                
+            # 아래 내용 웹훅 넣기
+            endTime = time.time() - startTime
             
-        # 아래 내용 웹훅 넣기
-        endTime = time.time() - startTime
-        
-        webhook_url = "https://adpeak.kr/chk_jisho/"
-        data = {'on_time' : endTime}
-        requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
-        r = requests.post(webhook_url, data=json.dumps(data), headers={'Content-Type' : 'application/json'}, verify=False)
+            webhook_url = "https://adpeak.kr/chk_jisho/"
+            data = {'on_time' : endTime}
+            requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
+            r = requests.post(webhook_url, data=json.dumps(data), headers={'Content-Type' : 'application/json'}, verify=False)
+        except:
+            continue
         
         
         
@@ -541,6 +544,7 @@ def ongo_searchItem():
 # 상품 들어가서 스크롤 내리고 나오기
 
 def onProductScroll(maxRange):
+    
     pg.moveTo(200, 200)
     forCount = 0
     while maxRange > forCount:
@@ -548,14 +552,21 @@ def onProductScroll(maxRange):
         pg.scroll(-scrollVal)
         wait_float(3, 5)
         forCount += 1
-
+        
     while True:
-        driver.back()
-        wait_float(3, 5)
-        get_shop_list = driver.find_element(by=By.CSS_SELECTOR, value='.mainFilter_option__c4_Lq')
-        if get_shop_list is not None:
-            return
-
+        wait_float(1.5, 2.3)
+        
+        if len(driver.window_handles) > 1:
+            driver.switch_to.window(driver.window_handles[1])
+            driver.close()
+            driver.switch_to.window(driver.window_handles[0])
+            
+        try:
+            get_shop_list = driver.find_element(by=By.CSS_SELECTOR, value='.mainFilter_option__c4_Lq')
+            if get_shop_list is not None:
+                return
+        except:
+            continue
 
 # 지식쇼핑 검색 (2번 해야되니께~~)
 def searchJisho(searchKeyword, driver):

@@ -39,7 +39,7 @@ import winsound as ws
 import glob
 import aiohttp
 import asyncio
-
+from PIL import Image
 
 
 
@@ -49,8 +49,20 @@ import asyncio
 def goScript(getDict):
     pass
 
-
-
+def imageReduceCapa():
+    # 1. 이미지 파일 기본 정보 읽기 #
+    print('시작~~~~~~~~~~~~~')
+    try:
+        im = Image.open("//pre_image//anchors.png")
+        img_width, img_height = im.size
+        print("이미지 확장자:", im.format)
+        print("이미지 사이즈:", im.size)
+        print("이미지 가로:", img_width)
+        print("이미지 세로:", img_height)
+        print("이미지 모드:", im.mode)
+    except OSError as e:
+        print('에러입니당~~~~~~~~~~~~~~~~~~')
+        print(e)
 
 
 def naverLogin(load_id, load_pass):

@@ -15,3 +15,10 @@ blog_auto/etc/content
 cafe_auto/content
 blog_auto/content
 미사용/
+
+Lib/
+Scripts/
+Include/
+pre_image/
+result_image/
+image_relate/
